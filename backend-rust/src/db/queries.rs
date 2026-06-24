@@ -9,9 +9,8 @@ pub async fn save_trade(_pool: &PgPool) -> Result<(), sqlx::Error> {
 }
 
 pub async fn get_settings(pool: &PgPool) -> Result<Vec<SystemSettings>, sqlx::Error> {
-    let settings = sqlx::query_as!(
-        SystemSettings,
-        "SELECT id, key, value FROM system_settings"
+    let settings = sqlx::query_as::<_, SystemSettings>(
+        "SELECT * FROM system_settings"
     )
     .fetch_all(pool)
     .await?;
@@ -19,11 +18,11 @@ pub async fn get_settings(pool: &PgPool) -> Result<Vec<SystemSettings>, sqlx::Er
 }
 
 pub async fn update_setting(pool: &PgPool, key: &str, value: &str) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "UPDATE system_settings SET value = $1 WHERE key = $2",
-        value,
-        key
+    sqlx::query(
+        "UPDATE system_settings SET value = $1 WHERE key = $2"
     )
+    .bind(value)
+    .bind(key)
     .execute(pool)
     .await?;
     Ok(())

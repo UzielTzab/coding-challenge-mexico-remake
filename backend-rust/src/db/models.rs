@@ -8,7 +8,7 @@ pub struct TradeInfo {
     // Otras propiedades
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct SystemSettings {
     pub id: i32,
     pub key: String,

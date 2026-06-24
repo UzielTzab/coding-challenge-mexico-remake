@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, onUnmounted } from 'vue';
-import { createChart, IChartApi, ISeriesApi, Time } from 'lightweight-charts';
+import { createChart } from 'lightweight-charts';
+import type { IChartApi, ISeriesApi, Time } from 'lightweight-charts';
 import AppCard from '../ui/AppCard.vue';
 
 const props = defineProps<{

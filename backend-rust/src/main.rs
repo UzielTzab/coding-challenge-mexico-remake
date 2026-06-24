@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // 4. Crear las rutas base de Axum
-    let app = api::handlers::router(settings.redis_url.clone(), pool);
+    let app = api::handlers::router(settings.redis_url.clone(), pool.clone());
 
     // 5. Iniciar la conexión a Binance y publicación a Redis en background
     let redis_url_for_stream = settings.redis_url.clone();

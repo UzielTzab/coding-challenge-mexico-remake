@@ -6,7 +6,7 @@ import { useOpportunitiesStore } from '../stores/opportunities.store';
 import { useUiStore } from '../stores/ui.store';
 
 export const useDashboardSocket = () => {
-  const wsUrl = (import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000') + '/ws/dashboard/';
+  const wsUrl = (import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000') + '/ws/market';
   const { ws, isConnected, connect } = useWebSocket(wsUrl);
   
   const marketStore = useMarketStore();
@@ -24,7 +24,7 @@ export const useDashboardSocket = () => {
           case 'market_update':
             // console.log(`[${new Date().toISOString()}] WS DATA RECEIVED for ${data.exchange}. Bid: ${data.best_bid}, Ask: ${data.best_ask}`);
             marketStore.upsertSnapshot({
-              exchange: data.exchange,
+              exchange: data.exchange.toLowerCase(),
               pair: data.symbol,
               bid: parseFloat(data.best_bid),
               ask: parseFloat(data.best_ask),
