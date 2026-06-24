@@ -6,17 +6,19 @@ use futures_util::{stream::StreamExt, SinkExt};
 use std::sync::Arc;
 use tracing::{error, info};
 
+use super::handlers::AppState;
+
 pub async fn ws_handler(
     ws: WebSocketUpgrade,
-    axum::extract::State(redis_url): axum::extract::State<Arc<String>>,
+    axum::extract::State(state): axum::extract::State<Arc<AppState>>,
 ) -> impl IntoResponse {
-    ws.on_upgrade(move |socket| handle_socket(socket, redis_url))
+    ws.on_upgrade(move |socket| handle_socket(socket, state.redis_url.clone()))
 }
 
-async fn handle_socket(socket: WebSocket, redis_url: Arc<String>) {
+async fn handle_socket(socket: WebSocket, redis_url: String) {
     let (mut sender, mut _receiver) = socket.split();
 
-    let client = match redis::Client::open(redis_url.as_ref().as_str()) {
+    let client = match redis::Client::open(redis_url.as_str()) {
         Ok(c) => c,
         Err(e) => {
             error!("Failed to create Redis client for WS: {:?}", e);

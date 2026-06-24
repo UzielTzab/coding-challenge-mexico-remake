@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useSettingsStore } from '@/stores/settings'
 
-const slippage = ref(0.1)
-const rebalanceThreshold = ref(1.5)
-const maxPosition = ref(50000)
+const store = useSettingsStore()
+const { slippage, rebalanceThreshold, maxPosition } = storeToRefs(store)
+
+onMounted(() => {
+  store.fetchConfiguration()
+})
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 const saveSettings = () => {
-  // TODO: Implement API call to save settings
-  console.log('Settings saved:', {
-    slippage: slippage.value,
-    rebalanceThreshold: rebalanceThreshold.value,
-    maxPosition: maxPosition.value
-  })
+  store.saveConfiguration()
 }
+
+const debouncedSave = () => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+  debounceTimer = setTimeout(() => {
+    saveSettings()
+  }, 500)
+}
+
+watch([slippage, rebalanceThreshold, maxPosition], () => {
+  debouncedSave()
+})
 </script>
 
 <template>

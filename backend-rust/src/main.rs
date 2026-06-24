@@ -19,12 +19,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing::info!("Conectando a PostgreSQL...");
     // No conectamos realmente si no está disponible, manejamos el error sutilmente
     // ya que Docker no está encendido en la máquina host según instrucciones
-    match db::establish_postgres_connection(&settings.database_url).await {
-        Ok(_pool) => {
+    let pool = match db::establish_postgres_connection(&settings.database_url).await {
+        Ok(pool) => {
             tracing::info!("Conexión a PostgreSQL establecida exitosamente.");
+            Some(pool)
         }
         Err(e) => {
             tracing::warn!("No se pudo conectar a PostgreSQL (¿Docker apagado?): {}", e);
+            None
         }
     };
 
@@ -45,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // 4. Crear las rutas base de Axum
-    let app = api::handlers::router(settings.redis_url.clone());
+    let app = api::handlers::router(settings.redis_url.clone(), pool);
 
     // 5. Iniciar la conexión a Binance y publicación a Redis en background
     let redis_url_for_stream = settings.redis_url.clone();
