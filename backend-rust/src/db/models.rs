@@ -11,8 +11,11 @@ pub struct TradeInfo {
 #[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct SystemSettings {
     pub id: i32,
-    pub key: String,
-    pub value: String,
+    pub min_net_profit_usd: rust_decimal::Decimal,
+    pub max_trade_volume_btc: rust_decimal::Decimal,
+    pub emergency_slippage_penalty_pct: rust_decimal::Decimal,
+    pub rebalance_threshold_pct: rust_decimal::Decimal,
+    pub is_bot_active: bool,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
@@ -24,7 +27,7 @@ pub struct WalletBalance {
     pub locked_balance: rust_decimal::Decimal,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct RebalanceEvent {
     pub id: uuid::Uuid,
     pub source_exchange: String,

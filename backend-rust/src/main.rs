@@ -51,8 +51,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 5. Iniciar la conexión a Binance y publicación a Redis en background
     let redis_url_for_stream = settings.redis_url.clone();
+    let pool_for_stream = pool.clone();
     tokio::spawn(async move {
-        engine::market_stream::run_market_stream(redis_url_for_stream).await;
+        engine::market_stream::run_market_stream(redis_url_for_stream, pool_for_stream).await;
     });
 
     // 6. Iniciar el Engine de Rebalanceo (si hay BD)

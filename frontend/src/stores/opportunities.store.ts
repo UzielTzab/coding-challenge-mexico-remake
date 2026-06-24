@@ -17,6 +17,9 @@ export const useOpportunitiesStore = defineStore('opportunities', () => {
 
   const prepend = (opp: Opportunity) => {
     items.value.unshift(opp);
+    if (items.value.length > 50) {
+      items.value.pop();
+    }
   };
 
   const updateGlobalPnl = (newPnl: number) => {

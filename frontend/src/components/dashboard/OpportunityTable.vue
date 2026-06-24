@@ -39,7 +39,7 @@ onMounted(async () => {
             <th>Estado</th>
           </tr>
         </thead>
-        <TransitionGroup name="list" tag="tbody" v-if="opportunities.length > 0">
+        <tbody v-if="opportunities.length > 0">
           <tr v-for="opp in opportunities" :key="opp.id">
             <td>{{ opp.symbol || opp.pair || 'BTC/USDT' }}</td>
             <td style="text-transform: capitalize;">{{ opp.buy_exchange_name || opp.buy_exchange }}</td>
@@ -55,7 +55,7 @@ onMounted(async () => {
               <span v-else class="status-badge danger">DESCARTADA 🔴</span>
             </td>
           </tr>
-        </TransitionGroup>
+        </tbody>
         <tbody v-else>
           <tr>
             <td colspan="6" class="empty-state">No hay oportunidades recientes</td>
@@ -80,20 +80,4 @@ onMounted(async () => {
 .status-badge { font-weight: 600; font-size: 11px; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.5px; }
 .status-badge.success { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
 .status-badge.danger { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
-
-/* Transitions */
-.list-move,
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.4s ease;
-}
-.list-enter-from {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(20px);
-}
-/* No absolute position to prevent table layout breaking */
 </style>

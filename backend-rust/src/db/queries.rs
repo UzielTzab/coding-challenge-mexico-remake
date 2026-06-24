@@ -10,19 +10,18 @@ pub async fn save_trade(_pool: &PgPool) -> Result<(), sqlx::Error> {
 
 pub async fn get_settings(pool: &PgPool) -> Result<Vec<SystemSettings>, sqlx::Error> {
     let settings = sqlx::query_as::<_, SystemSettings>(
-        "SELECT * FROM system_settings"
+        "SELECT id, min_net_profit_usd, max_trade_volume_btc, emergency_slippage_penalty_pct, rebalance_threshold_pct, is_bot_active FROM system_settings WHERE id = 1"
     )
     .fetch_all(pool)
     .await?;
     Ok(settings)
 }
 
-pub async fn update_setting(pool: &PgPool, key: &str, value: &str) -> Result<(), sqlx::Error> {
+pub async fn update_setting(pool: &PgPool, is_active: bool) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "UPDATE system_settings SET value = $1 WHERE key = $2"
+        "UPDATE system_settings SET is_bot_active = $1 WHERE id = 1"
     )
-    .bind(value)
-    .bind(key)
+    .bind(is_active)
     .execute(pool)
     .await?;
     Ok(())
@@ -72,4 +71,13 @@ pub async fn save_rebalance_event(
     .execute(pool)
     .await?;
     Ok(())
+}
+
+pub async fn get_rebalance_events(pool: &PgPool) -> Result<Vec<super::models::RebalanceEvent>, sqlx::Error> {
+    let events = sqlx::query_as::<_, super::models::RebalanceEvent>(
+        "SELECT id, source_exchange, target_exchange, asset, amount, routing_method, network_fee_usd FROM rebalance_events ORDER BY timestamp DESC"
+    )
+    .fetch_all(pool)
+    .await?;
+    Ok(events)
 }

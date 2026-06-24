@@ -1,7 +1,8 @@
 <template>
-  <div class="chart-wrapper" ref="chartContainer"></div>
+  <div class="chart-wrapper-outer">
+    <div class="chart-container" ref="chartContainer"></div>
+  </div>
 </template>
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, shallowRef } from 'vue'
 import { createChart, ColorType } from 'lightweight-charts'
@@ -75,7 +76,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.chart-wrapper {
+.chart-wrapper-outer {
   flex: 1;
   width: 100%;
   height: 100%;
@@ -87,5 +88,13 @@ onUnmounted(() => {
   background: rgba(13, 17, 23, 0.6);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chart-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 </style>

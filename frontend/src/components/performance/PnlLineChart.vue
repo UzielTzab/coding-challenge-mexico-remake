@@ -83,7 +83,8 @@ onUnmounted(() => {
     <div class="chart-header">
       <span class="uppercase-label">{{ title || 'Evolución del P&L' }}</span>
     </div>
-    <div class="chart-container" ref="chartContainer">
+    <div class="chart-wrapper-outer">
+      <div class="chart-container" ref="chartContainer"></div>
     </div>
   </AppCard>
 </template>
@@ -99,12 +100,18 @@ onUnmounted(() => {
   margin-bottom: 16px;
 }
 
-.chart-container {
+.chart-wrapper-outer {
   flex-grow: 1;
-  min-height: 0;
-  height: 250px;
   position: relative;
-  width: 100%;
+  min-height: 0;
+}
+
+.chart-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 </style>
 

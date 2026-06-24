@@ -23,6 +23,12 @@ CREATE TABLE wallet_balances (
     UNIQUE(exchange, asset)
 );
 
+INSERT INTO wallet_balances (exchange, asset, available_balance) VALUES 
+('Binance', 'BTC', 1.25),
+('Binance', 'USDT', 50000.00),
+('Kraken', 'BTC', 0.8),
+('Kraken', 'USDT', 35000.00);
+
 -- 3. TABLA DE OPERACIONES (TRADES)
 CREATE TABLE trades (
     id UUID PRIMARY KEY,
