@@ -4,6 +4,7 @@ import { useMarketStore } from '../stores/market.store';
 import { useLogsStore } from '../stores/logs.store';
 import { useOpportunitiesStore } from '../stores/opportunities.store';
 import { useUiStore } from '../stores/ui.store';
+import { useBotStore } from '../stores/bot.store';
 
 export const useDashboardSocket = () => {
   const wsUrl = (import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000') + '/ws/market';
@@ -48,8 +49,17 @@ export const useDashboardSocket = () => {
           case 'EMERGENCY_HEDGE':
             uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage crítico detectado. Cubriendo posición para evitar pérdida mayor.`, 'critical', 6000);
             break;
-          case 'opportunity_detected':
+          case 'opportunity_detected': {
             const opp = data.opportunity || data;
+            const botStore = useBotStore();
+            
+            // Si el bot está apagado, la oportunidad simplemente se registra como descartada/ignorada
+            if (botStore.status !== 'running') {
+              opp.status = 'discarded';
+              oppStore.prepend(opp);
+              break; // No mostramos snackbar porque el bot está apagado
+            }
+
             oppStore.prepend(opp);
             
             if (opp.is_partial_fill || opp.status === 'emergency_hedge') {
@@ -58,6 +68,7 @@ export const useDashboardSocket = () => {
               uiStore.showSnackbar(`Arbitraje Ejecutado: <strong>+$${parseFloat(opp.net_profit).toFixed(2)}</strong>`, 'success');
             }
             break;
+          }
           case 'trade_simulated':
             if (data.is_partial_fill) {
                uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage detectado en simulación.`, 'critical', 6000);
