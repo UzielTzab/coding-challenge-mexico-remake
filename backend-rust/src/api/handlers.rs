@@ -35,6 +35,10 @@ pub fn router(redis_url: String, pool: Option<PgPool>) -> Router {
         .route("/api/opportunities/", get(dummy_opportunities))
         .route("/api/trades", get(dummy_opportunities))
         .route("/api/trades/", get(dummy_opportunities))
+        .route("/api/wallets/", get(dummy_wallets))
+        .route("/api/wallets", get(dummy_wallets))
+        .route("/api/wallets/movements/", get(dummy_wallet_movements))
+        .route("/api/wallets/movements", get(dummy_wallet_movements))
         .layer(cors)
         .with_state(state)
 }
@@ -68,6 +72,30 @@ async fn dummy_exchanges() -> Json<serde_json::Value> {
 
 async fn dummy_opportunities() -> Json<serde_json::Value> {
     Json(serde_json::json!([]))
+}
+
+async fn dummy_wallets() -> Json<serde_json::Value> {
+    Json(serde_json::json!([
+        {
+            "exchange": "Binance",
+            "btc_available": 1.25,
+            "usdt_available": 50000.0,
+            "total_value_usd": 125000.0
+        },
+        {
+            "exchange": "Kraken",
+            "btc_available": 0.8,
+            "usdt_available": 35000.0,
+            "total_value_usd": 83000.0
+        }
+    ]))
+}
+
+async fn dummy_wallet_movements() -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "count": 0,
+        "results": []
+    }))
 }
 
 #[derive(serde::Deserialize)]
