@@ -1,8 +1,8 @@
-# 🚀 ArbiBTC: Motor HFT de Arbitraje Institucional (Fase Final)
+# ArbiBTC: Motor HFT de Arbitraje Institucional (Fase Final)
 
 Este repositorio contiene la entrega final del **Bot de Arbitraje Institucional** para la gran final del Hackathon. El sistema ha sido diseñado desde cero bajo una arquitectura de microservicios robusta y orientada al máximo rendimiento.
 
-## 🌟 Arquitectura del Sistema
+## Arquitectura del Sistema
 
 El ecosistema está construido con las siguientes tecnologías:
 
@@ -11,7 +11,7 @@ El ecosistema está construido con las siguientes tecnologías:
 3. **Redis (Pub/Sub):** Broker de mensajería ultrarrápida. El backend publica los spreads (oportunidades) y el frontend los consume vía WebSockets.
 4. **PostgreSQL:** Persistencia real de configuraciones de usuario (`system_settings`) y registros de eventos contables (`rebalance_events`, `wallet_balances`).
 
-## 🛠️ Instrucciones de Despliegue Rápido (Jueces)
+## Instrucciones de Despliegue Rápido (Jueces)
 
 Todo el sistema está contenerizado. Para desplegar la plataforma completa en tu máquina local, ejecuta:
 
@@ -25,7 +25,7 @@ Una vez que los contenedores arranquen:
 
 ---
 
-## ⚡ Concepto Técnico: Kernel Bypass (Preparación)
+## Concepto Técnico: Kernel Bypass (Preparación)
 
 El motor en Rust ha sido estructurado conceptualmente para poder integrar tecnologías de **Kernel Bypass** (como DPDK o Solarflare OpenOnload). 
 - **¿Qué es?** El Kernel Bypass permite que los paquetes de red (TCP/UDP) salten directamente desde la tarjeta de red (NIC) hacia el espacio de usuario (nuestro binario de Rust), evadiendo la sobrecarga de interrupciones del Kernel de Linux.
@@ -33,7 +33,7 @@ El motor en Rust ha sido estructurado conceptualmente para poder integrar tecnol
 
 ---
 
-## 🚨 Probando el "Emergency Hedge" y Rebalanceo
+## Probando el "Emergency Hedge" y Rebalanceo
 
 1. **Slippage y Riesgo:** Modifica el control deslizante de *Slippage* en el panel de **Settings**. Observarás cómo en el Dashboard las oportunidades dejan de ejecutarse si el mercado se vuelve demasiado volátil (simulado por el `RiskManager`).
 2. **Rebalanceo Triangular:** El sistema monitorea los saldos reales en PostgreSQL. Si Binance cae por debajo de `0.1 BTC`, el motor de Rust intercepta la condición, genera un *Triangular Rebalance* (puente XRP), deduce USDT de Kraken y abona BTC a Binance para proveer liquidez y evitar el *Liquidity Drain*.
