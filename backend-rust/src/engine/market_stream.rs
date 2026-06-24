@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 use tracing::{error, info};
 use url::Url;
+use crate::engine::arbitrage::ArbitrageEngine;
+use crate::engine::risk::RiskManager;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct MarketTick {
@@ -53,15 +55,35 @@ pub async fn run_market_stream(redis_url: String) {
                                     ticker.ask_price.parse::<f64>(),
                                 ) {
                                     let tick = MarketTick {
-                                        symbol: ticker.symbol,
+                                        symbol: ticker.symbol.clone(),
                                         bid,
                                         ask,
                                         timestamp: ticker.event_time,
                                     };
                                     
-                                    if let Ok(tick_json) = serde_json::to_string(&tick) {
-                                        if let Err(e) = redis_conn.publish::<_, _, ()>("market:spreads", tick_json).await {
-                                            error!("Failed to publish to Redis: {:?}", e);
+                                    // Mock a second exchange's tick (e.g., Kraken) with a slight random price difference
+                                    let mut mock_tick = tick.clone();
+                                    let rand_diff = (rand::random::<f64>() - 0.5) * 10.0; // +/- 5 USD difference
+                                    mock_tick.bid += rand_diff;
+                                    mock_tick.ask += rand_diff;
+
+                                    let risk_manager = RiskManager::default();
+                                    let arbitrage_engine = ArbitrageEngine::new(risk_manager, 2.0); // Threshold of 2.0
+                                    
+                                    if let Some(result) = arbitrage_engine.detect_spread(&tick, &mock_tick) {
+                                        let pnl_event = serde_json::json!({
+                                            "type": "PNL",
+                                            "symbol": ticker.symbol,
+                                            "spread": result.spread,
+                                            "net_profit": result.net_profit,
+                                            "is_partial_fill": result.is_partial_fill,
+                                            "timestamp": ticker.event_time
+                                        });
+                                        
+                                        if let Ok(pnl_json) = serde_json::to_string(&pnl_event) {
+                                            if let Err(e) = redis_conn.publish::<_, _, ()>("market:spreads", pnl_json).await {
+                                                error!("Failed to publish PNL to Redis: {:?}", e);
+                                            }
                                         }
                                     }
                                 }

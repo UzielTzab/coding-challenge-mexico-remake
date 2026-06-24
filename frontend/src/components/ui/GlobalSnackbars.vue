@@ -15,6 +15,7 @@ const uiStore = useUiStore();
       >
         <span class="snackbar-icon" v-if="snackbar.type === 'success'">🟢</span>
         <span class="snackbar-icon" v-if="snackbar.type === 'error'">🔴</span>
+        <span class="snackbar-icon" v-if="snackbar.type === 'critical'">🚨</span>
         <span class="snackbar-icon" v-if="snackbar.type === 'info'">ℹ️</span>
         <span class="snackbar-icon" v-if="snackbar.type === 'warning'">⚠️</span>
         <span class="snackbar-text" v-html="snackbar.text"></span>
@@ -54,6 +55,15 @@ const uiStore = useUiStore();
 
 .snackbar-success { border-left-color: var(--color-success, #10b981); }
 .snackbar-error { border-left-color: var(--color-danger, #ef4444); }
+.snackbar-critical { 
+  border-left-color: #ff0f0f;
+  background: rgba(255, 15, 15, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 15, 15, 0.5);
+  box-shadow: 0 8px 32px rgba(255, 15, 15, 0.3);
+  color: #fff;
+  font-weight: bold;
+}
 .snackbar-warning { border-left-color: var(--color-warning, #f59e0b); }
 .snackbar-info { border-left-color: var(--color-primary, #3b82f6); }
 

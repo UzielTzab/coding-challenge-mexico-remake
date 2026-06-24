@@ -42,16 +42,26 @@ export const useDashboardSocket = () => {
               timestamp: data.created_at
             });
             break;
+          case 'REBALANCE':
+            uiStore.showSnackbar(`Drenaje de Liquidez en <strong>${data.target}</strong>. Iniciando Enrutamiento Triangular (${data.method}) para ${data.amount} ${data.asset}.`, 'critical', 6000);
+            break;
+          case 'EMERGENCY_HEDGE':
+            uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage crítico detectado. Cubriendo posición para evitar pérdida mayor.`, 'critical', 6000);
+            break;
           case 'opportunity_detected':
             const opp = data.opportunity || data;
             oppStore.prepend(opp);
             
-            if (opp.status === 'executed' || opp.status === 'profitable') {
+            if (opp.is_partial_fill || opp.status === 'emergency_hedge') {
+              uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage crítico en arbitraje. Cubriendo posición.`, 'critical', 6000);
+            } else if (opp.status === 'executed' || opp.status === 'profitable') {
               uiStore.showSnackbar(`Arbitraje Ejecutado: <strong>+$${parseFloat(opp.net_profit).toFixed(2)}</strong>`, 'success');
             }
             break;
           case 'trade_simulated':
-            // tradesStore.prepend(data);
+            if (data.is_partial_fill) {
+               uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage detectado en simulación.`, 'critical', 6000);
+            }
             break;
           case 'wallet_updated':
             // walletsStore.update(data);

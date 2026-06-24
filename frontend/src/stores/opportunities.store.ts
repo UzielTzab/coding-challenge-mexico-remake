@@ -5,7 +5,7 @@ import type { Opportunity } from '../types/domain.types';
 export const useOpportunitiesStore = defineStore('opportunities', () => {
   const items = ref<Opportunity[]>([]);
   const totalPnl = ref(0);
-  const pnlHistory = ref<{date: string, value: number}[]>([]);
+  const pnlHistory = ref<{date: string, value: number, time: number}[]>([]);
   
   const summary = ref({
     global_win_rate: 0,
@@ -24,7 +24,8 @@ export const useOpportunitiesStore = defineStore('opportunities', () => {
     const now = new Date();
     pnlHistory.value.push({
       date: now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' }),
-      value: totalPnl.value
+      value: totalPnl.value,
+      time: Math.floor(now.getTime() / 1000)
     });
     if (pnlHistory.value.length > 20) {
       pnlHistory.value.shift();
@@ -34,9 +35,11 @@ export const useOpportunitiesStore = defineStore('opportunities', () => {
   const setInitialPnl = (initialPnl: number) => {
     totalPnl.value = initialPnl;
     if (pnlHistory.value.length === 0) {
+      const now = new Date();
       pnlHistory.value.push({
-        date: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' }),
-        value: initialPnl
+        date: now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute:'2-digit', second:'2-digit' }),
+        value: initialPnl,
+        time: Math.floor(now.getTime() / 1000)
       });
     }
   };

@@ -9,10 +9,10 @@ const chartData = computed(() => {
   if (oppStore.pnlHistory.length === 0) {
     // mock provisional initial
     return [
-      { date: 'Inicio', value: oppStore.totalPnl }
+      { date: 'Inicio', value: oppStore.totalPnl, time: Math.floor(Date.now() / 1000) }
     ];
   }
-  return oppStore.pnlHistory.map(h => ({ date: h.date, value: h.value }));
+  return oppStore.pnlHistory.map(h => ({ date: h.date, value: h.value, time: h.time }));
 });
 </script>
 

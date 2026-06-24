@@ -35,11 +35,15 @@ async fn handle_socket(socket: WebSocket, redis_url: String) {
     };
 
     if let Err(e) = pubsub_conn.subscribe("market:spreads").await {
-        error!("Failed to subscribe to Redis channel: {:?}", e);
+        error!("Failed to subscribe to market:spreads: {:?}", e);
         return;
     }
+    
+    if let Err(e) = pubsub_conn.subscribe("REBALANCE_CHANNEL").await {
+        error!("Failed to subscribe to REBALANCE_CHANNEL: {:?}", e);
+    }
 
-    info!("Client connected to WS and subscribed to market:spreads");
+    info!("Client connected to WS and subscribed to market:spreads and REBALANCE_CHANNEL");
 
     let mut pubsub_stream = pubsub_conn.into_on_message();
 

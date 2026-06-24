@@ -55,6 +55,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         engine::market_stream::run_market_stream(redis_url_for_stream).await;
     });
 
+    // 6. Iniciar el Engine de Rebalanceo (si hay BD)
+    if let Some(p) = pool.clone() {
+        let redis_url_for_rebalancer = settings.redis_url.clone();
+        tokio::spawn(async move {
+            let rebalancer = engine::rebalancer::Rebalancer::new(p, redis_url_for_rebalancer);
+            rebalancer.run_worker().await;
+        });
+    }
+
     // Dirección IP 0.0.0.0 es necesaria para exponer el puerto fuera de Docker
     let addr = SocketAddr::from(([0, 0, 0, 0], settings.server_port));
     tracing::info!("Servidor REST/WS (Axum) escuchando en {}", addr);
