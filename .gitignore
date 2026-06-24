@@ -1,0 +1,8 @@
+# Agent memory and workspace rules
+.agents/
+
+# Environment variables
+.env
+
+# MacOS
+.DS_Store

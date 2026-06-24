@@ -1,0 +1,87 @@
+import { defineStore } from 'pinia'
+import { ref, shallowRef } from 'vue'
+
+export interface CandleData {
+  time: number | string; // lightweight-charts accepts timestamp (seconds) or string ('YYYY-MM-DD')
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+type Subscriber = (candle: CandleData) => void;
+
+export const useMarketStore = defineStore('market', () => {
+  const currentPnL = ref(0)
+  const volume24h = ref(0)
+  
+  // Reactively track connection status if needed
+  const isConnected = ref(false)
+  const wsError = ref<Error | null>(null)
+
+  // Use a fast channel (subscribers array) instead of full reactive state for 60FPS updates
+  // This avoids Vue's reactivity overhead on high-frequency data
+  const subscribers = shallowRef<Subscriber[]>([])
+
+  const subscribe = (callback: Subscriber) => {
+    subscribers.value.push(callback)
+    return () => {
+      subscribers.value = subscribers.value.filter(cb => cb !== callback)
+    }
+  }
+
+  // WebSocket initialization
+  const ws = new WebSocket('ws://localhost:8000/ws/market')
+
+  ws.onopen = () => {
+    isConnected.value = true
+    wsError.value = null
+  }
+
+  ws.onclose = () => {
+    isConnected.value = false
+  }
+
+  ws.onerror = (e) => {
+    wsError.value = e as unknown as Error
+  }
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data)
+      
+      // Update reactive UI stats if needed (throttle if it's too frequent)
+      if (data.pnl !== undefined) {
+        currentPnL.value = data.pnl
+      }
+      if (data.volume !== undefined) {
+        volume24h.value = data.volume
+      }
+
+      // Fast path for chart updates: assuming data has candle fields
+      if (data.time && data.open && data.high && data.low && data.close) {
+        const candle: CandleData = {
+          time: data.time,
+          open: data.open,
+          high: data.high,
+          low: data.low,
+          close: data.close
+        }
+        
+        // Notify chart components directly without triggering Vue re-renders
+        for (let i = 0; i < subscribers.value.length; i++) {
+          subscribers.value[i](candle)
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse WebSocket message', e)
+    }
+  }
+
+  return {
+    currentPnL,
+    volume24h,
+    isConnected,
+    subscribe
+  }
+})
