@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: arbitrage_user
+      POSTGRES_PASSWORD: arbitrage_password
+      POSTGRES_DB: arbitrage_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: 
+      context: ./backend-rust
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://arbitrage_user:arbitrage_password@db:5432/arbitrage_db
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - db
+      - cache
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
