@@ -7,6 +7,7 @@ use url::Url;
 use std::sync::Arc;
 use tokio::sync::RwLock;
 use sqlx::PgPool;
+use rust_decimal::prelude::FromPrimitive;
 
 use crate::engine::arbitrage::ArbitrageEngine;
 use crate::engine::risk::RiskManager;
@@ -205,22 +206,28 @@ async fn check_arbitrage(
     let arbitrage_engine = ArbitrageEngine::new(risk_manager, 2.0);
     
     if let Some(result) = arbitrage_engine.detect_spread(&binance_tick, &kraken_tick) {
-        let opp_status = if result.is_partial_fill { "emergency_hedge" } else { "executed" };
+        let mut opp_status = if result.is_partial_fill { "emergency_hedge" } else { "executed" };
+
+        let mut is_active = false;
+        if let Some(p) = &pool {
+            if let Ok(settings) = crate::db::queries::get_settings(p).await {
+                for s in settings {
+                    if s.is_bot_active {
+                        is_active = true;
+                    }
+                }
+            }
+        }
+
+        if !is_active {
+            opp_status = "discarded";
+        }
         
         // REBALANCEO TRIANGULAR (Ejecución Simulada con DB)
         if opp_status == "executed" {
             if let Some(p) = &pool {
-                // Verificar si el bot está activo y saldos
-                if let Ok(settings) = crate::db::queries::get_settings(p).await {
-                    let mut is_active = false;
-                    for s in settings {
-                        if s.is_bot_active {
-                            is_active = true;
-                        }
-                    }
-
-                    if is_active {
-                        // Leer saldo binance btc
+                if is_active {
+                    // Leer saldo binance btc
                         if let Ok(balances) = crate::db::queries::get_wallet_balances(p).await {
                             let mut binance_btc = rust_decimal::Decimal::new(0, 0);
                             let mut kraken_usdt = rust_decimal::Decimal::new(0, 0);
@@ -258,8 +265,28 @@ async fn check_arbitrage(
                                 info!("Triangular Rebalance Executed! XRP_BRIDGE used.");
                             }
                         }
-                    }
                 }
+            }
+        }
+
+        // SAVE TRADE TO DB
+        if opp_status == "executed" || opp_status == "emergency_hedge" {
+            if let Some(p) = &pool {
+                use std::str::FromStr;
+                let trade = crate::db::models::Trade {
+                    id: uuid::Uuid::new_v4(),
+                    timestamp: chrono::Utc::now().naive_utc(),
+                    buy_exchange: if binance_tick.ask < kraken_tick.ask { "Binance".to_string() } else { "Kraken".to_string() },
+                    sell_exchange: if binance_tick.bid > kraken_tick.bid { "Binance".to_string() } else { "Kraken".to_string() },
+                    volume_btc: rust_decimal::Decimal::from_str("0.01").unwrap(), // Dummy volume
+                    buy_price_usd: rust_decimal::Decimal::from_f64(if binance_tick.ask < kraken_tick.ask { binance_tick.ask } else { kraken_tick.ask }).unwrap_or_default(),
+                    sell_price_usd: rust_decimal::Decimal::from_f64(if binance_tick.bid > kraken_tick.bid { binance_tick.bid } else { kraken_tick.bid }).unwrap_or_default(),
+                    gross_profit_usd: rust_decimal::Decimal::from_f64(result.spread).unwrap_or_default(),
+                    net_profit_usd: rust_decimal::Decimal::from_f64(result.net_profit).unwrap_or_default(),
+                    execution_status: opp_status.to_string(),
+                    latency_ms: 15,
+                };
+                let _ = crate::db::queries::save_trade(p, &trade).await;
             }
         }
 

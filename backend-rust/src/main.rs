@@ -56,12 +56,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         engine::market_stream::run_market_stream(redis_url_for_stream, pool_for_stream).await;
     });
 
-    // 6. Iniciar el Engine de Rebalanceo (si hay BD)
+    // 6. Iniciar el Engine de Rebalanceo y Garbage Collection (si hay BD)
     if let Some(p) = pool.clone() {
         let redis_url_for_rebalancer = settings.redis_url.clone();
         tokio::spawn(async move {
             let rebalancer = engine::rebalancer::Rebalancer::new(p, redis_url_for_rebalancer);
             rebalancer.run_worker().await;
+        });
+
+        // Garbage Collection: Poda de trades viejos cada hora
+        let p_gc = p.clone();
+        tokio::spawn(async move {
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(3600));
+            loop {
+                interval.tick().await;
+                tracing::info!("Ejecutando Garbage Collection de Trades (Poda de 24 hrs)...");
+                match db::queries::prune_old_trades(&p_gc).await {
+                    Ok(_) => tracing::info!("Garbage Collection exitoso. Trades antiguos eliminados."),
+                    Err(e) => tracing::error!("Error en Garbage Collection: {}", e),
+                }
+            }
         });
     }
 

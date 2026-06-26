@@ -1,7 +1,7 @@
 import type { ArbitrageOpportunity } from '../types/domain.types';
-import get from './http';
+import api from './http';
 
 export const getOpportunities = async (params?: any) => {
-  const { data } = await get<ArbitrageOpportunity[]>('/api/opportunities/', { params });
-  return data;
+  const response = await api.get('/api/opportunities/', { params });
+  return response.data;
 };

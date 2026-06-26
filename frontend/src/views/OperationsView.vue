@@ -14,9 +14,9 @@ const totalRecords = ref(0);
 const loadData = async () => {
   isLoading.value = true;
   try {
-    const result = await getTrades({ page: currentPage.value });
-    totalRecords.value = result.count || 0;
-    operations.value = result.results || result;
+    const result = await getTrades({ page: currentPage.value, limit: 10 });
+    totalRecords.value = result.total_items || 0;
+    operations.value = result.data || result;
   } catch (error) {
     console.error('Error fetching trades:', error);
   } finally {

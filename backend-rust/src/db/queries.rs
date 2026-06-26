@@ -3,9 +3,59 @@
 use sqlx::PgPool;
 use super::models::SystemSettings;
 
-pub async fn save_trade(_pool: &PgPool) -> Result<(), sqlx::Error> {
-    // TODO: Insertar log de P&L
+pub async fn save_trade(pool: &PgPool, trade: &super::models::Trade) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "INSERT INTO trades (id, buy_exchange, sell_exchange, volume_btc, buy_price_usd, sell_price_usd, gross_profit_usd, net_profit_usd, execution_status, latency_ms)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+    )
+    .bind(trade.id)
+    .bind(&trade.buy_exchange)
+    .bind(&trade.sell_exchange)
+    .bind(trade.volume_btc)
+    .bind(trade.buy_price_usd)
+    .bind(trade.sell_price_usd)
+    .bind(trade.gross_profit_usd)
+    .bind(trade.net_profit_usd)
+    .bind(&trade.execution_status)
+    .bind(trade.latency_ms)
+    .execute(pool)
+    .await?;
     Ok(())
+}
+
+pub async fn get_trades(pool: &PgPool, page: u32, limit: u32) -> Result<Vec<super::models::Trade>, sqlx::Error> {
+    let offset = (page.saturating_sub(1)) * limit;
+    let trades = sqlx::query_as::<_, super::models::Trade>(
+        "SELECT id, timestamp, buy_exchange, sell_exchange, volume_btc, buy_price_usd, sell_price_usd, gross_profit_usd, net_profit_usd, execution_status, latency_ms FROM trades ORDER BY timestamp DESC LIMIT $1 OFFSET $2"
+    )
+    .bind(limit as i64)
+    .bind(offset as i64)
+    .fetch_all(pool)
+    .await?;
+    Ok(trades)
+}
+
+pub async fn prune_old_trades(pool: &PgPool) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE FROM trades WHERE timestamp < NOW() - INTERVAL '24 hours'")
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
+pub async fn get_trades_count(pool: &PgPool) -> Result<i64, sqlx::Error> {
+    let count: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM trades")
+        .fetch_one(pool)
+        .await?;
+    Ok(count.0)
+}
+
+pub async fn get_performance(pool: &PgPool) -> Result<super::models::TradePerformance, sqlx::Error> {
+    let perf = sqlx::query_as::<_, super::models::TradePerformance>(
+        "SELECT SUM(net_profit_usd) as total_profit_usd, COUNT(*) as active_trades FROM trades"
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(perf)
 }
 
 pub async fn get_settings(pool: &PgPool) -> Result<Vec<SystemSettings>, sqlx::Error> {

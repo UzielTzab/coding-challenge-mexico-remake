@@ -36,9 +36,9 @@ const data = computed(() => store.items);
 const loadData = async (filters = {}) => {
   isLoading.value = true;
   try {
-    const result = await getOpportunities({ ...filters, page: currentPage.value });
-    totalRecords.value = result.count || 0;
-    store.items = result.results || result;
+    const result = await getOpportunities({ ...filters, page: currentPage.value, limit: 10 });
+    totalRecords.value = result.total_items || 0;
+    store.items = result.data || result;
   } catch (error) {
     console.error('Error fetching opportunities:', error);
   } finally {

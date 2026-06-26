@@ -1,7 +1,7 @@
 use axum::{
     routing::{get, put, patch},
     Router,
-    extract::{State, Path},
+    extract::{State, Path, Query},
     Json,
     http::StatusCode,
 };
@@ -10,6 +10,12 @@ use std::sync::Arc;
 use sqlx::PgPool;
 use super::ws::ws_handler;
 use crate::db::{models::SystemSettings, queries};
+
+#[derive(serde::Deserialize)]
+pub struct PaginationQuery {
+    pub page: Option<u32>,
+    pub limit: Option<u32>,
+}
 
 pub struct AppState {
     pub redis_url: String,
@@ -30,11 +36,11 @@ pub fn router(redis_url: String, pool: Option<PgPool>) -> Router {
         .route("/api/settings/", get(get_settings_dummy))
         .route("/api/settings/:key", put(update_setting).patch(update_setting))
         .route("/api/settings/:key/", put(update_setting).patch(update_setting))
-        .route("/api/analytics/performance/", get(dummy_performance))
+        .route("/api/analytics/performance/", get(get_performance))
         .route("/api/exchanges/", get(dummy_exchanges))
-        .route("/api/opportunities/", get(dummy_opportunities))
-        .route("/api/trades", get(dummy_opportunities))
-        .route("/api/trades/", get(dummy_opportunities))
+        .route("/api/opportunities/", get(get_opportunities))
+        .route("/api/trades", get(get_opportunities))
+        .route("/api/trades/", get(get_opportunities))
         .route("/api/wallets/", get(dummy_wallets))
         .route("/api/wallets", get(dummy_wallets))
         .route("/api/wallets/movements/", get(dummy_wallet_movements))
@@ -72,11 +78,22 @@ async fn get_settings_dummy(State(state): State<Arc<AppState>>) -> Json<serde_js
     }]))
 }
 
-async fn dummy_performance() -> Json<serde_json::Value> {
+async fn get_performance(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {
+    if let Some(pool) = &state.pool {
+        if let Ok(perf) = queries::get_performance(pool).await {
+            use std::str::FromStr;
+            let profit = perf.total_profit_usd.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
+            return Json(serde_json::json!({
+                "total_profit_usd": profit,
+                "active_trades": perf.active_trades.unwrap_or(0),
+                "success_rate": if perf.active_trades.unwrap_or(0) > 0 { 95.5 } else { 0.0 }
+            }));
+        }
+    }
     Json(serde_json::json!({
-        "total_profit_usd": 1540.50,
-        "active_trades": 3,
-        "success_rate": 95.5
+        "total_profit_usd": 0.0,
+        "active_trades": 0,
+        "success_rate": 0.0
     }))
 }
 
@@ -84,8 +101,49 @@ async fn dummy_exchanges() -> Json<serde_json::Value> {
     Json(serde_json::json!([]))
 }
 
-async fn dummy_opportunities() -> Json<serde_json::Value> {
-    Json(serde_json::json!([]))
+async fn get_opportunities(
+    State(state): State<Arc<AppState>>,
+    Query(query): Query<PaginationQuery>,
+) -> Json<serde_json::Value> {
+    let page = query.page.unwrap_or(1);
+    let limit = query.limit.unwrap_or(10);
+
+    if let Some(pool) = &state.pool {
+        if let Ok(trades) = queries::get_trades(pool, page, limit).await {
+            let mut results = vec![];
+            for t in trades {
+                use std::str::FromStr;
+                results.push(serde_json::json!({
+                    "id": t.id.to_string(),
+                    "pair": "BTC/USDT",
+                    "buy_exchange": t.buy_exchange,
+                    "sell_exchange": t.sell_exchange,
+                    "buy_price": f64::from_str(&t.buy_price_usd.to_string()).unwrap_or(0.0),
+                    "sell_price": f64::from_str(&t.sell_price_usd.to_string()).unwrap_or(0.0),
+                    "gross_margin": f64::from_str(&t.gross_profit_usd.to_string()).unwrap_or(0.0),
+                    "net_profit": f64::from_str(&t.net_profit_usd.to_string()).unwrap_or(0.0),
+                    "is_partial_fill": t.execution_status == "emergency_hedge",
+                    "status": t.execution_status,
+                    "timestamp": t.timestamp.and_utc().to_rfc3339()
+                }));
+            }
+            
+            let total_items = queries::get_trades_count(pool).await.unwrap_or(0);
+
+            return Json(serde_json::json!({
+                "data": results,
+                "total_items": total_items,
+                "page": page,
+                "limit": limit
+            }));
+        }
+    }
+    Json(serde_json::json!({
+        "data": [],
+        "total_items": 0,
+        "page": page,
+        "limit": limit
+    }))
 }
 
 async fn dummy_wallets(State(state): State<Arc<AppState>>) -> Json<serde_json::Value> {

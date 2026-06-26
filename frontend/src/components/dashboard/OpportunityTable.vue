@@ -12,7 +12,7 @@ const { formatUSD, formatPercent } = useFormatters();
 onMounted(async () => {
   try {
     const data = await getOpportunities();
-    const results = data.results || data;
+    const results = data.data || data.results || data;
     if (Array.isArray(results) && oppStore.items.length === 0) {
       oppStore.items = results;
     }

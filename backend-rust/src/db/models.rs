@@ -1,11 +1,24 @@
 // Estructuras de tablas (P&L Histórico, Settings Editables por API)
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-pub struct TradeInfo {
+#[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
+pub struct Trade {
     pub id: uuid::Uuid,
-    pub symbol: String,
-    pub pnl: rust_decimal::Decimal,
-    // Otras propiedades
+    pub timestamp: chrono::NaiveDateTime,
+    pub buy_exchange: String,
+    pub sell_exchange: String,
+    pub volume_btc: rust_decimal::Decimal,
+    pub buy_price_usd: rust_decimal::Decimal,
+    pub sell_price_usd: rust_decimal::Decimal,
+    pub gross_profit_usd: rust_decimal::Decimal,
+    pub net_profit_usd: rust_decimal::Decimal,
+    pub execution_status: String,
+    pub latency_ms: i32,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
+pub struct TradePerformance {
+    pub total_profit_usd: Option<rust_decimal::Decimal>,
+    pub active_trades: Option<i64>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]
