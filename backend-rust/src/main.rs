@@ -59,8 +59,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 6. Iniciar el Engine de Rebalanceo y Garbage Collection (si hay BD)
     if let Some(p) = pool.clone() {
         let redis_url_for_rebalancer = settings.redis_url.clone();
+        
+        let p_rebalancer = p.clone();
         tokio::spawn(async move {
-            let rebalancer = engine::rebalancer::Rebalancer::new(p, redis_url_for_rebalancer);
+            let rebalancer = engine::rebalancer::Rebalancer::new(p_rebalancer, redis_url_for_rebalancer);
             rebalancer.run_worker().await;
         });
 
