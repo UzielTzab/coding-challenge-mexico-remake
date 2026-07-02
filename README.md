@@ -1,8 +1,8 @@
-# ArbiBTC: Motor HFT de Arbitraje Institucional (Fase Final)
+# ArbiBTC: Motor HFT de Arbitraje
 
 Este repositorio contiene la entrega final del **Bot de Arbitraje Institucional** para la gran final del Hackathon. El sistema ha sido diseñado desde cero bajo una arquitectura de microservicios robusta, orientada al máximo rendimiento, gestión de riesgo de grado Wall-Street y neutralidad de portafolio.
 
-## 🚀 Arquitectura y Stack Tecnológico
+## Arquitectura y Stack Tecnológico
 
 El ecosistema está construido con las siguientes tecnologías:
 
@@ -13,7 +13,7 @@ El ecosistema está construido con las siguientes tecnologías:
 
 ---
 
-## 🛡️ Características Avanzadas (Nivel Institucional)
+## Características Avanzadas
 
 A diferencia de un bot tradicional, este motor incorpora protecciones de una mesa de *Prop Trading*:
 
@@ -25,7 +25,7 @@ A diferencia de un bot tradicional, este motor incorpora protecciones de una mes
 
 ---
 
-## 💻 Instrucciones de Instalación y Despliegue (Jueces)
+## Instrucciones de Instalación y Despliegue
 
 Todo el sistema está contenerizado. Para desplegar la plataforma completa en tu máquina local, ejecuta:
 
@@ -41,7 +41,7 @@ Una vez que los contenedores arranquen:
 
 ---
 
-## 📸 Capturas de Pantalla
+## Capturas de Pantalla
 
 A continuación, se muestra el sistema en acción:
 
@@ -57,7 +57,7 @@ A continuación, se muestra el sistema en acción:
 
 ---
 
-## ⚡ Concepto Técnico Futuro: Kernel Bypass
+## Concepto Técnico Futuro: Kernel Bypass
 
 El motor en Rust ha sido estructurado conceptualmente para poder integrar tecnologías de **Kernel Bypass** (como DPDK o Solarflare OpenOnload). 
 - **¿Qué es?** El Kernel Bypass permite que los paquetes de red (TCP/UDP) salten directamente desde la tarjeta de red (NIC) hacia el espacio de usuario (nuestro binario de Rust), evadiendo la sobrecarga de interrupciones del Kernel de Linux.
