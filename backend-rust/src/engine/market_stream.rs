@@ -48,12 +48,14 @@ struct KrakenTickerMessage {
 struct SharedState {
     binance_tick: Option<MarketTick>,
     kraken_tick: Option<MarketTick>,
+    last_trade_time: Option<u64>,
 }
 
 pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>) {
     let state = Arc::new(RwLock::new(SharedState {
         binance_tick: None,
         kraken_tick: None,
+        last_trade_time: None,
     }));
 
     let redis_url_clone = redis_url.clone();
@@ -205,6 +207,18 @@ async fn check_arbitrage(
     let arbitrage_engine = ArbitrageEngine::new(risk_manager, 2.0);
     
     if let Some(result) = arbitrage_engine.detect_spread(&binance_tick, &kraken_tick) {
+        {
+            let mut w = state.write().await;
+            let now = chrono::Utc::now().timestamp_millis() as u64;
+            if let Some(last_time) = w.last_trade_time {
+                if now - last_time < 2000 {
+                    // PHANTOM LIQUIDITY PROTECTION: 2 seconds cooldown
+                    return; 
+                }
+            }
+            w.last_trade_time = Some(now);
+        }
+
         let mut opp_status = if result.is_partial_fill { 
             "emergency_hedge" 
         } else if result.is_legging_hedge {

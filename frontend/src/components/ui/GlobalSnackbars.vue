@@ -28,7 +28,7 @@ const uiStore = useUiStore();
 <style scoped>
 .snackbar-container {
   position: fixed;
-  bottom: 24px;
+  top: 80px;
   right: 24px;
   z-index: 9999;
   display: flex;

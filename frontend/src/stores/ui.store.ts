@@ -12,6 +12,11 @@ export const useUiStore = defineStore('ui', () => {
   let nextId = 0;
 
   function showSnackbar(text: string, type: 'success' | 'error' | 'info' | 'warning' | 'critical' = 'info', duration = 4000) {
+    // Evitar spam visual: No duplicar el mismo mensaje si ya está en pantalla
+    if (snackbars.value.some(s => s.text === text)) {
+      return;
+    }
+
     const id = nextId++;
     snackbars.value.push({ id, text, type });
     setTimeout(() => {
