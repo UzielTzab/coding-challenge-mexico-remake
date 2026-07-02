@@ -2,7 +2,7 @@ use futures_util::{StreamExt, SinkExt};
 use redis::AsyncCommands;
 use serde::{Deserialize, Serialize};
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
-use tracing::{error, info};
+use tracing::info;
 use url::Url;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -32,7 +32,6 @@ struct BinanceBookTicker {
 
 #[derive(Debug, Deserialize)]
 struct KrakenTickerData {
-    symbol: String,
     bid: f64,
     ask: f64,
 }
@@ -202,11 +201,17 @@ async fn check_arbitrage(
         (r.binance_tick.clone().unwrap(), r.kraken_tick.clone().unwrap())
     };
 
-    let risk_manager = RiskManager::default();
+    let risk_manager = RiskManager::new(0.05, 0.01);
     let arbitrage_engine = ArbitrageEngine::new(risk_manager, 2.0);
     
     if let Some(result) = arbitrage_engine.detect_spread(&binance_tick, &kraken_tick) {
-        let mut opp_status = if result.is_partial_fill { "emergency_hedge" } else { "executed" };
+        let mut opp_status = if result.is_partial_fill { 
+            "emergency_hedge" 
+        } else if result.is_legging_hedge {
+            "legging_hedge"
+        } else { 
+            "executed" 
+        };
 
         let mut is_active = false;
         if let Some(p) = &pool {
@@ -223,54 +228,73 @@ async fn check_arbitrage(
             opp_status = "discarded";
         }
         
-        // REBALANCEO TRIANGULAR (Ejecución Simulada con DB)
+        // REBALANCEO TRIANGULAR (Ejecución Simulada con DB) Y DELTA NEUTRALITY
         if opp_status == "executed" {
             if let Some(p) = &pool {
                 if is_active {
-                    // Leer saldo binance btc
-                        if let Ok(balances) = crate::db::queries::get_wallet_balances(p).await {
-                            let mut binance_btc = rust_decimal::Decimal::new(0, 0);
-                            let mut kraken_usdt = rust_decimal::Decimal::new(0, 0);
+                    // Leer saldos
+                    if let Ok(balances) = crate::db::queries::get_wallet_balances(p).await {
+                        let mut binance_btc = rust_decimal::Decimal::new(0, 0);
+                        let mut kraken_usdt = rust_decimal::Decimal::new(0, 0);
+                        let mut kraken_btc = rust_decimal::Decimal::new(0, 0);
 
-                            for b in &balances {
-                                if b.exchange == "Binance" && b.asset == "BTC" {
-                                    binance_btc = b.available_balance;
-                                }
-                                if b.exchange == "Kraken" && b.asset == "USDT" {
-                                    kraken_usdt = b.available_balance;
-                                }
+                        for b in &balances {
+                            if b.exchange == "Binance" && b.asset == "BTC" {
+                                binance_btc = b.available_balance;
                             }
-
-                            use std::str::FromStr;
-                            let threshold = rust_decimal::Decimal::from_str("0.1").unwrap();
-
-                            if binance_btc < threshold {
-                                // Ejecutar rebalanceo: Restar 100 USDT de kraken, sumar 0.05 BTC a Binance
-                                let new_kraken_usdt = kraken_usdt - rust_decimal::Decimal::from_str("100.0").unwrap();
-                                let new_binance_btc = binance_btc + rust_decimal::Decimal::from_str("0.05").unwrap();
-
-                                let _ = crate::db::queries::update_wallet_balance(p, "Kraken", "USDT", new_kraken_usdt).await;
-                                let _ = crate::db::queries::update_wallet_balance(p, "Binance", "BTC", new_binance_btc).await;
-
-                                let evt = crate::db::models::RebalanceEvent {
-                                    id: uuid::Uuid::new_v4(),
-                                    source_exchange: "Kraken".to_string(),
-                                    target_exchange: "Binance".to_string(),
-                                    asset: "USDT_TO_BTC".to_string(),
-                                    amount: rust_decimal::Decimal::from_str("100.0").unwrap(),
-                                    routing_method: "XRP_BRIDGE".to_string(),
-                                    network_fee_usd: rust_decimal::Decimal::from_str("0.25").unwrap(),
-                                };
-                                let _ = crate::db::queries::save_rebalance_event(p, &evt).await;
-                                info!("Triangular Rebalance Executed! XRP_BRIDGE used.");
+                            if b.exchange == "Kraken" && b.asset == "USDT" {
+                                kraken_usdt = b.available_balance;
+                            }
+                            if b.exchange == "Kraken" && b.asset == "BTC" {
+                                kraken_btc = b.available_balance;
                             }
                         }
+
+                        use std::str::FromStr;
+                        
+                        // DELTA NEUTRALITY HEDGE
+                        let net_btc = binance_btc + kraken_btc;
+                        if net_btc > rust_decimal::Decimal::from_str("2.0").unwrap() {
+                            let evt = serde_json::json!({
+                                "type": "DELTA_HEDGE",
+                                "asset": "BTC",
+                                "net_exposure": net_btc,
+                                "message": "High Net BTC Exposure. Simulating Perpetual Short Position."
+                            });
+                            if let Ok(json) = serde_json::to_string(&evt) {
+                                let _ = redis_conn.publish::<_, _, ()>("market:spreads", json).await;
+                            }
+                        }
+
+                        // REBALANCEO TRIANGULAR
+                        let threshold = rust_decimal::Decimal::from_str("0.1").unwrap();
+                        if binance_btc < threshold {
+                            // Ejecutar rebalanceo: Restar 100 USDT de kraken, sumar 0.05 BTC a Binance
+                            let new_kraken_usdt = kraken_usdt - rust_decimal::Decimal::from_str("100.0").unwrap();
+                            let new_binance_btc = binance_btc + rust_decimal::Decimal::from_str("0.05").unwrap();
+
+                            let _ = crate::db::queries::update_wallet_balance(p, "Kraken", "USDT", new_kraken_usdt).await;
+                            let _ = crate::db::queries::update_wallet_balance(p, "Binance", "BTC", new_binance_btc).await;
+
+                            let evt = crate::db::models::RebalanceEvent {
+                                id: uuid::Uuid::new_v4(),
+                                source_exchange: "Kraken".to_string(),
+                                target_exchange: "Binance".to_string(),
+                                asset: "USDT_TO_BTC".to_string(),
+                                amount: rust_decimal::Decimal::from_str("100.0").unwrap(),
+                                routing_method: "XRP_BRIDGE".to_string(),
+                                network_fee_usd: rust_decimal::Decimal::from_str("0.25").unwrap(),
+                            };
+                            let _ = crate::db::queries::save_rebalance_event(p, &evt).await;
+                            info!("Triangular Rebalance Executed! XRP_BRIDGE used.");
+                        }
+                    }
                 }
             }
         }
 
         // SAVE TRADE TO DB
-        if opp_status == "executed" || opp_status == "emergency_hedge" {
+        if opp_status == "executed" || opp_status == "emergency_hedge" || opp_status == "legging_hedge" {
             if let Some(p) = &pool {
                 use std::str::FromStr;
                 let trade = crate::db::models::Trade {
@@ -302,6 +326,8 @@ async fn check_arbitrage(
                 "gross_margin": result.spread,
                 "net_profit": result.net_profit,
                 "is_partial_fill": result.is_partial_fill,
+                "is_legging_hedge": result.is_legging_hedge,
+                "order_type": "IOC",
                 "status": opp_status,
                 "timestamp": chrono::Utc::now().to_rfc3339()
             }
@@ -310,5 +336,34 @@ async fn check_arbitrage(
         if let Ok(opp_json) = serde_json::to_string(&opp_event) {
             let _ = redis_conn.publish::<_, _, ()>("market:spreads", opp_json).await;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_binance_json_parse_success() {
+        let json = r#"{"s":"BTCUSDT","b":"60100.50","a":"60101.50"}"#;
+        let ticker: Result<BinanceBookTicker, _> = serde_json::from_str(json);
+        assert!(ticker.is_ok());
+        let t = ticker.unwrap();
+        assert_eq!(t.symbol, "BTCUSDT");
+        assert_eq!(t.bid_price, "60100.50");
+        assert_eq!(t.ask_price, "60101.50");
+    }
+
+    #[test]
+    fn test_kraken_json_parse_success() {
+        let json = r#"{"channel":"ticker","type":"update","data":[{"bid":60100.50,"ask":60101.50}]}"#;
+        let msg: Result<KrakenTickerMessage, _> = serde_json::from_str(json);
+        assert!(msg.is_ok());
+        let m = msg.unwrap();
+        assert_eq!(m.channel, "ticker");
+        assert_eq!(m.msg_type, "update");
+        assert_eq!(m.data.len(), 1);
+        assert_eq!(m.data[0].bid, 60100.50);
+        assert_eq!(m.data[0].ask, 60101.50);
     }
 }

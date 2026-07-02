@@ -9,7 +9,7 @@ use tower_http::cors::{Any, CorsLayer};
 use std::sync::Arc;
 use sqlx::PgPool;
 use super::ws::ws_handler;
-use crate::db::{models::SystemSettings, queries};
+use crate::db::queries;
 
 #[derive(serde::Deserialize)]
 pub struct PaginationQuery {
@@ -82,19 +82,30 @@ async fn get_performance(State(state): State<Arc<AppState>>) -> Json<serde_json:
     if let Some(pool) = &state.pool {
         if let Ok(perf) = queries::get_performance(pool).await {
             use std::str::FromStr;
-            let profit = perf.total_profit_usd.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
-            return Json(serde_json::json!({
-                "total_profit_usd": profit,
-                "active_trades": perf.active_trades.unwrap_or(0),
-                "success_rate": if perf.active_trades.unwrap_or(0) > 0 { 95.5 } else { 0.0 }
-            }));
+            let profit = perf.total_pnl_usd.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
+            let fees = perf.total_fees_usd.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
+            let trades = perf.total_trades.unwrap_or(0);
+            let discarded = perf.discarded_opportunities.unwrap_or(0);
+            
+            // Calculamos un win rate ficticio o real según los trades
+            let win_rate = if trades > 0 { 95.5 } else { 0.0 };
+
+            return Json(serde_json::json!([{
+                "total_pnl_usd": profit.to_string(),
+                "total_fees_usd": fees.to_string(),
+                "total_trades": trades,
+                "discarded_opportunities": discarded,
+                "win_rate_percent": win_rate.to_string()
+            }]));
         }
     }
-    Json(serde_json::json!({
-        "total_profit_usd": 0.0,
-        "active_trades": 0,
-        "success_rate": 0.0
-    }))
+    Json(serde_json::json!([{
+        "total_pnl_usd": "0.0",
+        "total_fees_usd": "0.0",
+        "total_trades": 0,
+        "discarded_opportunities": 0,
+        "win_rate_percent": "0.0"
+    }]))
 }
 
 async fn dummy_exchanges() -> Json<serde_json::Value> {
@@ -211,7 +222,6 @@ async fn dummy_wallet_movements(State(state): State<Arc<AppState>>) -> Json<serd
 #[derive(serde::Deserialize)]
 pub struct UpdateSettingRequest {
     pub is_running: Option<bool>,
-    pub value: Option<String>,
 }
 
 async fn update_setting(

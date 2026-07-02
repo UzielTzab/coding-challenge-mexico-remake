@@ -51,7 +51,12 @@ pub async fn get_trades_count(pool: &PgPool) -> Result<i64, sqlx::Error> {
 
 pub async fn get_performance(pool: &PgPool) -> Result<super::models::TradePerformance, sqlx::Error> {
     let perf = sqlx::query_as::<_, super::models::TradePerformance>(
-        "SELECT SUM(net_profit_usd) as total_profit_usd, COUNT(*) as active_trades FROM trades"
+        "SELECT 
+            SUM(net_profit_usd) as total_pnl_usd, 
+            COUNT(CASE WHEN execution_status IN ('executed', 'emergency_hedge') THEN 1 END) as total_trades,
+            COUNT(CASE WHEN execution_status = 'discarded' THEN 1 END) as discarded_opportunities,
+            SUM(gross_profit_usd - net_profit_usd) as total_fees_usd
+         FROM trades"
     )
     .fetch_one(pool)
     .await?;

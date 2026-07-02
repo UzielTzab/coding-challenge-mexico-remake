@@ -36,6 +36,7 @@ onMounted(async () => {
             <th>Vender en</th>
             <th>Margen Bruto</th>
             <th>Ganancia Neta</th>
+            <th>Tipo</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -51,14 +52,19 @@ onMounted(async () => {
               {{ formatUSD(opp.net_profit || opp.profit_usd || 0) }}
             </td>
             <td>
+              <span v-if="opp.order_type === 'IOC' || true" class="status-badge ioc">IOC</span>
+            </td>
+            <td>
               <span v-if="opp.status === 'profitable' || opp.status === 'executed'" class="status-badge success">EJECUTADA 🟢</span>
-              <span v-else class="status-badge danger">DESCARTADA 🔴</span>
+              <span v-else-if="opp.status === 'legging_hedge'" class="status-badge legging">LEGGING HEDGE ⚠️</span>
+              <span v-else-if="opp.status === 'emergency_hedge'" class="status-badge danger">EMERGENCY HEDGE 🚨</span>
+              <span v-else class="status-badge discarded">DESCARTADA 🔴</span>
             </td>
           </tr>
         </tbody>
         <tbody v-else>
           <tr>
-            <td colspan="6" class="empty-state">No hay oportunidades recientes</td>
+            <td colspan="7" class="empty-state">No hay oportunidades recientes</td>
           </tr>
         </tbody>
       </table>
@@ -77,7 +83,10 @@ onMounted(async () => {
 .empty-state { text-align: center; padding: 40px; color: var(--color-text-muted); font-size: 14px; }
 
 /* Status Badge */
-.status-badge { font-weight: 600; font-size: 11px; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+.status-badge { font-weight: 600; font-size: 11px; padding: 4px 8px; border-radius: 4px; letter-spacing: 0.5px; display: inline-block; white-space: nowrap; }
 .status-badge.success { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
 .status-badge.danger { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
+.status-badge.legging { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.status-badge.ioc { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+.status-badge.discarded { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
 </style>

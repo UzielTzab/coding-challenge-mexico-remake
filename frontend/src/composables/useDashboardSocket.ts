@@ -49,6 +49,9 @@ export const useDashboardSocket = () => {
           case 'EMERGENCY_HEDGE':
             uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage crítico detectado. Cubriendo posición para evitar pérdida mayor.`, 'critical', 6000);
             break;
+          case 'DELTA_HEDGE':
+            uiStore.showSnackbar(`<strong>Delta Neutrality:</strong> ${data.message} (${data.net_exposure} BTC)`, 'critical', 6000);
+            break;
           case 'opportunity_detected': {
             const opp = data.opportunity || data;
             const botStore = useBotStore();
@@ -64,8 +67,11 @@ export const useDashboardSocket = () => {
             
             if (opp.is_partial_fill || opp.status === 'emergency_hedge') {
               uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage crítico en arbitraje. Cubriendo posición.`, 'critical', 6000);
+            } else if (opp.status === 'legging_hedge') {
+              uiStore.showSnackbar(`<strong>Legging Risk Detectado:</strong> Pata 2 falló. Ejecutando Market Dump.`, 'warning', 6000);
             } else if (opp.status === 'executed' || opp.status === 'profitable') {
-              uiStore.showSnackbar(`Arbitraje Ejecutado: <strong>+$${parseFloat(opp.net_profit).toFixed(2)}</strong>`, 'success');
+              // Silenciamos las tostadas verdes para evitar "flooding" visual en HFT real
+              // Feedback se refleja en las tablas y KPIs.
             }
             break;
           }
