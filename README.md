@@ -43,17 +43,27 @@ Una vez que los contenedores arranquen:
 
 ## Capturas de Pantalla
 
-A continuación, se muestra el sistema en acción:
+A continuación, se muestra el sistema en acción a lo largo de todas sus vistas principales:
 
 ### Dashboard Principal y Detección HFT
 *(Panel general mostrando los Ticks en tiempo real, KPIs y Órdenes IOC)*
-![Dashboard Principal](./docs/assets/dashboard.png)
+![Dashboard Principal](./screenshots/dashboard.png)
 
-### Gestión de Riesgo (Delta Neutrality & Legging)
-*(El sistema detectando exceso de exposición BTC y protegiéndose)*
-![Delta Neutrality Alertas](./docs/assets/delta_hedge.png)
+### Rendimiento (Evolución del P&L)
+*(Gráfica en tiempo real del Profit & Loss generado por el bot)*
+![Rendimiento del Bot](./screenshots/performance.png)
 
-*(Nota: Agrega tus propias capturas de pantalla en la carpeta `docs/assets/` con estos nombres para que se visualicen correctamente en Github/Gitlab).*
+### Oportunidades
+*(Listado de todas las oportunidades detectadas y su estatus)*
+![Oportunidades](./screenshots/opportunities.png)
+
+### Operaciones
+*(Historial completo de las ejecuciones, market dumps y hedges)*
+![Operaciones](./screenshots/operations.png)
+
+### Billeteras (Wallets y Rebalanceo)
+*(Control de inventario de activos en los exchanges)*
+![Wallets y Rebalanceo](./screenshots/wallets.png)
 
 ---
 
