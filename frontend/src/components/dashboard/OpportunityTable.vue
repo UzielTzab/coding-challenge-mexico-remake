@@ -87,6 +87,6 @@ onMounted(async () => {
 .status-badge.success { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
 .status-badge.danger { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
 .status-badge.legging { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-.status-badge.ioc { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); }
+.status-badge.ioc { background: rgba(59, 130, 246, 0.15); color: #3b82f6;}
 .status-badge.discarded { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
 </style>

@@ -1,7 +1,8 @@
 :root {
   /* Fondo general y layout (Estilo Navy Dark) */
   --color-bg-base: #0E1226; /* Fondo principal más oscuro */
-  --color-bg-secondary: #0F121E; /* Fondo secundario profundo */
+  --color-bg-secondary: #07090f; /* Fondo secundario profundo */
+   --color-bg-tertiary: #0F121E;
   --color-bg-card: #151826; /* Fondo de tarjetas */
   --color-bg-card-soft: #1A1D2D;
   --color-bg-terminal: #0A0C11;
@@ -16,7 +17,7 @@
   
   /* Acentos y Branding */
   --color-primary: #3B82F6;
-  --color-primary-light: #9bc3f3;
+  --color-primary-light: #ffdd00;
   --color-primary-dark: #2563EB;
   --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   

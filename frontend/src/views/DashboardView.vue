@@ -86,29 +86,23 @@ onMounted(async () => {
       <KpiCard class="col-span-2" title="Costo Promedio" :value="oppStore.summary.average_cost" prefix="$" />
       <KpiCard class="col-span-3" title="Precio Promedio BTC" :value="averageBtcPrice" prefix="$" />
 
-      <!-- Fila 2: Exchanges (3 cards x 4 columnas = 12 cols) -->
-      <ExchangeCard 
-        class="col-span-4" 
-        exchangeName="Binance" 
-        :connected="Object.keys(marketStore.snapshots).some(k => k.includes('binance'))" 
-        :marketData="Object.values(marketStore.snapshots).find(m => m.exchange === 'binance')" 
-      />
-      <ExchangeCard 
-        class="col-span-4" 
-        exchangeName="Kraken" 
-        :connected="Object.keys(marketStore.snapshots).some(k => k.includes('kraken'))" 
-        :marketData="Object.values(marketStore.snapshots).find(m => m.exchange === 'kraken')" 
-      />
-      <ExchangeCard 
-        class="col-span-4" 
-        exchangeName="Bitfinex" 
-        :connected="Object.keys(marketStore.snapshots).some(k => k.includes('bitfinex'))" 
-        :marketData="Object.values(marketStore.snapshots).find(m => m.exchange === 'bitfinex')" 
-      />
+      <!-- Fila 2: Gráficas y Exchanges -->
+      <PerformanceCharts class="col-span-8" />
+      <div class="col-span-4 exchange-cards-container">
+        <ExchangeCard 
+          exchangeName="Binance" 
+          :connected="Object.keys(marketStore.snapshots).some(k => k.includes('binance'))" 
+          :marketData="Object.values(marketStore.snapshots).find(m => m.exchange === 'binance')" 
+        />
+        <ExchangeCard 
+          exchangeName="Kraken" 
+          :connected="Object.keys(marketStore.snapshots).some(k => k.includes('kraken'))" 
+          :marketData="Object.values(marketStore.snapshots).find(m => m.exchange === 'kraken')" 
+        />
+      </div>
 
-      <!-- Fila 3: Oportunidades y Charts -->
-      <OpportunityTable class="col-span-6" />
-      <PerformanceCharts class="col-span-6" />
+      <!-- Fila 3: Oportunidades (Full Width) -->
+      <OpportunityTable class="col-span-12" />
     </template>
   </div>
 </template>
@@ -127,7 +121,14 @@ onMounted(async () => {
 .col-span-5 { grid-column: span 5; }
 .col-span-6 { grid-column: span 6; }
 .col-span-7 { grid-column: span 7; }
+.col-span-8 { grid-column: span 8; }
 .col-span-12 { grid-column: span 12; }
+
+.exchange-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
 
 @media (max-width: 1200px) {
   .dashboard-grid { grid-template-columns: repeat(6, 1fr); }
@@ -137,11 +138,12 @@ onMounted(async () => {
   .col-span-5 { grid-column: span 6; }
   .col-span-6 { grid-column: span 6; }
   .col-span-7 { grid-column: span 6; }
+  .col-span-8 { grid-column: span 6; }
 }
 
 @media (max-width: 768px) {
   .dashboard-grid { grid-template-columns: 1fr; }
-  .col-span-2, .col-span-3, .col-span-4, .col-span-5, .col-span-7, .col-span-12 {
+  .col-span-2, .col-span-3, .col-span-4, .col-span-5, .col-span-7, .col-span-8, .col-span-12 {
     grid-column: span 1;
   }
 }

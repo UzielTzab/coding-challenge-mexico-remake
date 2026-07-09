@@ -128,26 +128,30 @@ onMounted(() => {
     <div class="header-actions">
       <div class="status-indicators">
         <div class="status">
-          <span class="status-dot" :class="backendStatus ? 'status-dot--success' : 'status-dot--danger'"></span>
+          <span class="material-symbols-outlined status-icon" :class="backendStatus ? 'status-icon--success' : 'status-icon--danger'">
+            {{ backendStatus ? 'check_circle' : 'cancel' }}
+          </span>
           <span class="text-sm text-muted">Backend {{ backendStatus ? 'OK' : 'Error' }}</span>
         </div>
         <div class="status">
-          <span class="status-dot" :class="wsStatus ? 'status-dot--success' : 'status-dot--danger'"></span>
+          <span class="material-symbols-outlined status-icon" :class="wsStatus ? 'status-icon--success' : 'status-icon--danger'">
+            {{ wsStatus ? 'check_circle' : 'cancel' }}
+          </span>
           <span class="text-sm text-muted">WS {{ wsStatus ? 'OK' : 'Error' }}</span>
         </div>
       </div>
       
       <div class="action-buttons">
         <AppTooltip v-if="botStore.status === 'stopped'" text="Conecta los WebSockets de Binance, Kraken y Bitfinex y activa la detección de arbitraje en tiempo real">
-          <button class="btn-dark btn-toggle" :disabled="isToggling" @click="toggleBot(true)">
+          <button class="btn-primary-light btn-toggle" :disabled="isToggling" @click="toggleBot(true)">
             <span>Iniciar Bot</span>
           </button>
         </AppTooltip>
         <button v-else-if="botStore.status === 'starting'" class="btn-dark btn-toggle" disabled>
           <div class="btn-spinner"></div>
         </button>
-        <button v-else class="btn-dark btn-toggle" style="background-color: #ff3800" :disabled="isToggling" @click="toggleBot(false)">
-          <div v-if="isToggling" class="btn-spinner"></div>
+        <button v-else class="btn-primary-light btn-toggle" :disabled="isToggling" @click="toggleBot(false)">
+          <div v-if="isToggling" class="btn-spinner" style="border-top-color: #000;"></div>
           <span v-else>Pausar Bot</span>
         </button>
       </div>
@@ -208,14 +212,12 @@ onMounted(() => {
   font-weight: 500;
 }
 
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.status-icon {
+  font-size: 16px;
 }
 
-.status-dot--success { background: var(--color-success); }
-.status-dot--danger { background: var(--color-danger); }
+.status-icon--success { color: var(--color-success); }
+.status-icon--danger { color: var(--color-danger); }
 
 .action-buttons {
   display: flex;
@@ -236,6 +238,22 @@ onMounted(() => {
 }
 .btn-dark:hover:not(:disabled) { background: #303446; }
 .btn-dark:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.btn-primary-light {
+  background: var(--color-primary-light);
+  color: #000000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 150ms;
+}
+.btn-primary-light:hover:not(:disabled) { 
+  opacity: 0.85;
+}
+.btn-primary-light:disabled { opacity: 0.7; cursor: not-allowed; }
 
 .btn-toggle {
   min-width: 100px;

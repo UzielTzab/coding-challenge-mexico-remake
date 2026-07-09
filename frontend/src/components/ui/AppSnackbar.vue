@@ -80,8 +80,8 @@ const handleClose = () => {
 }
 
 .snackbar-btn {
-  background: var(--color-primary);
-  color: white;
+  background: var(--color-primary-light);
+  color: #000000;
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -96,7 +96,7 @@ const handleClose = () => {
 }
 
 .snackbar-btn:hover:not(:disabled) {
-  background: #3a5bcf;
+  opacity: 0.85;
 }
 
 .snackbar-btn:disabled {

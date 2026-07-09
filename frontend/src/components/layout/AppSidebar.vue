@@ -50,7 +50,7 @@ const links = [
 <style scoped>
 .sidebar {
   width: 100%;
-  background: var(--color-bg-base);
+  background: var(--color-bg-tertiary);
   border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
@@ -105,7 +105,7 @@ const links = [
 }
 
 .nav-link.active {
-  background: transparent;
+  background: var(--color-bg-secondary);
   color: var(--color-primary-light);
   font-weight: 600;
 }

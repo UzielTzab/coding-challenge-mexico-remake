@@ -46,26 +46,21 @@ const uiStore = useUiStore();
   max-width: 450px;
   padding: 14px 18px;
   background: var(--color-bg-card, #202230);
-  color: var(--color-text-primary, #ffffff);
-  border-radius: 0 8px 8px 0; /* Contorno izquierdo recto */
+  color: #ffffff;
+  border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.25);
-  border-left: 4px solid var(--color-primary);
   font-size: 14px;
 }
 
-.snackbar-success { border-left-color: var(--color-success, #10b981); }
-.snackbar-error { border-left-color: var(--color-danger, #ef4444); }
+.snackbar-success { background: var(--color-success, #10b981); color: #ffffff; }
+.snackbar-info { background: var(--color-success, #10b981); color: #ffffff; }
+.snackbar-warning { background: var(--color-warning, #f59e0b); color: #ffffff; }
+.snackbar-error { background: var(--color-danger, #ef4444); color: #ffffff; }
 .snackbar-critical { 
-  border-left-color: #ff0f0f;
-  background: rgba(255, 15, 15, 0.15);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 15, 15, 0.5);
-  box-shadow: 0 8px 32px rgba(255, 15, 15, 0.3);
-  color: #fff;
+  background: var(--color-danger, #ef4444); 
+  color: #ffffff;
   font-weight: bold;
 }
-.snackbar-warning { border-left-color: var(--color-warning, #f59e0b); }
-.snackbar-info { border-left-color: var(--color-primary, #3b82f6); }
 
 .snackbar-text {
   flex: 1;
