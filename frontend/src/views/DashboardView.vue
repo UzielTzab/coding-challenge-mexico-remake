@@ -79,19 +79,12 @@ onMounted(async () => {
     </template>
     
     <template v-else>
-      <!-- Fila 1: KPIs (6 cards x 2 columnas = 12 cols) -->
-      <KpiCard class="col-span-2" title="P&L Total" :value="oppStore.totalPnl" prefix="$" />
+      <!-- Fila 1: KPIs (5 cards) -->
+      <KpiCard class="col-span-3" title="P&L Total" :value="oppStore.totalPnl" prefix="$" />
       <KpiCard class="col-span-2" title="Win Rate" :value="oppStore.summary.global_win_rate" suffix="%" />
       <KpiCard class="col-span-2" title="Ops Ejecutadas" :value="oppStore.summary.trades_count" decimals="0" />
-      <KpiCard 
-        class="col-span-2" 
-        title="Oportunidades" 
-        :value="oppStore.summary.opportunities_count" 
-        decimals="0"
-        :subtextHtml="`<span><span class='success'>🟢 ${oppStore.summary.trades_count} ejecutadas</span> &nbsp;|&nbsp; <span class='danger'>🔴 ${oppStore.summary.discarded_opportunities} descartadas</span></span>`"
-      />
       <KpiCard class="col-span-2" title="Costo Promedio" :value="oppStore.summary.average_cost" prefix="$" />
-      <KpiCard class="col-span-2" title="Precio Promedio BTC" :value="averageBtcPrice" prefix="$" />
+      <KpiCard class="col-span-3" title="Precio Promedio BTC" :value="averageBtcPrice" prefix="$" />
 
       <!-- Fila 2: Exchanges (3 cards x 4 columnas = 12 cols) -->
       <ExchangeCard 
@@ -129,6 +122,7 @@ onMounted(async () => {
 }
 
 .col-span-2 { grid-column: span 2; }
+.col-span-3 { grid-column: span 3; }
 .col-span-4 { grid-column: span 4; }
 .col-span-5 { grid-column: span 5; }
 .col-span-6 { grid-column: span 6; }
@@ -138,6 +132,7 @@ onMounted(async () => {
 @media (max-width: 1200px) {
   .dashboard-grid { grid-template-columns: repeat(6, 1fr); }
   .col-span-2 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 3; }
   .col-span-4 { grid-column: span 6; }
   .col-span-5 { grid-column: span 6; }
   .col-span-6 { grid-column: span 6; }
@@ -146,7 +141,7 @@ onMounted(async () => {
 
 @media (max-width: 768px) {
   .dashboard-grid { grid-template-columns: 1fr; }
-  .col-span-2, .col-span-4, .col-span-5, .col-span-7, .col-span-12 {
+  .col-span-2, .col-span-3, .col-span-4, .col-span-5, .col-span-7, .col-span-12 {
     grid-column: span 1;
   }
 }

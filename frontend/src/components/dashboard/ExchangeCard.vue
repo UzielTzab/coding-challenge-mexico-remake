@@ -38,18 +38,18 @@ const realVolume = computed(() => {
   return v.toFixed(3);
 });
 
-// Order book mock depth for analysis lines
 const orderbook = computed(() => {
   if (!props.marketData) return [];
   const b = props.marketData.bid;
   const a = props.marketData.ask;
   const s = spread.value || 1;
+  const v = props.marketData.bidVolume || 1.5;
   
   return [
-    { price: a + s * 1.5, type: 'ask', width: 40 + (b % 30) },
-    { price: a, type: 'ask', width: 20 + (a % 20) },
-    { price: b, type: 'bid', width: 30 + (b % 25) },
-    { price: b - s * 1.5, type: 'bid', width: 50 + (a % 35) }
+    { price: a + s * 1.5, type: 'ask', width: 40 + (b % 30), vol: (v * 1.5).toFixed(3) },
+    { price: a, type: 'ask', width: 20 + (a % 20), vol: (v * 0.8).toFixed(3) },
+    { price: b, type: 'bid', width: 30 + (b % 25), vol: (v * 1.2).toFixed(3) },
+    { price: b - s * 1.5, type: 'bid', width: 50 + (a % 35), vol: (v * 2.1).toFixed(3) }
   ];
 });
 
@@ -101,10 +101,9 @@ const formatPriceCompact = (val: number) => {
       <!-- Orderbook Depth -->
       <div class="ex-depth">
         <div class="depth-row" v-for="(row, idx) in orderbook" :key="idx">
-          <span class="depth-price">{{ formatPriceCompact(row.price) }}</span>
-          <div class="depth-bar-container">
-            <div class="depth-bar" :class="row.type" :style="{ width: row.width + '%' }"></div>
-          </div>
+          <div class="depth-bar-bg" :class="row.type" :style="{ width: row.width + '%' }"></div>
+          <span class="depth-price" :class="row.type">{{ formatPriceCompact(row.price) }}</span>
+          <span class="depth-vol">{{ row.vol }}</span>
         </div>
       </div>
     </template>
@@ -239,43 +238,38 @@ const formatPriceCompact = (val: number) => {
 .ex-depth {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 4px;
 }
 
 .depth-row {
+  position: relative;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-}
-
-.depth-price {
+  padding: 4px 8px;
   font-family: "JetBrains Mono", "IBM Plex Mono", Consolas, monospace;
   font-size: 13px;
-  color: var(--color-text-muted);
-  width: 70px;
-}
-
-.depth-bar-container {
-  flex-grow: 1;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
+  z-index: 1;
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.depth-bar {
+.depth-bar-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
   height: 100%;
-  border-radius: 2px;
+  opacity: 0.15;
+  z-index: -1;
   transition: width 0.3s ease;
 }
 
-.depth-bar.ask {
-  background: rgba(239, 68, 68, 0.6);
-}
+.depth-bar-bg.ask { background: var(--color-danger); }
+.depth-bar-bg.bid { background: var(--color-success); }
 
-.depth-bar.bid {
-  background: rgba(16, 185, 129, 0.6);
-}
+.depth-price.ask { color: var(--color-danger); }
+.depth-price.bid { color: var(--color-success); }
+.depth-vol { color: var(--color-text-primary); font-weight: 500; }
 
 .empty-state {
   display: flex;
