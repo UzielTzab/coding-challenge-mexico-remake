@@ -1,7 +1,5 @@
 # Variables Globales CSS (Estilo Institutional Dark)
 
-Estas son las variables extraídas de tu proyecto original, diseñadas para mantener ese look "Premium/Navy Dark" que los jurados adorarán ver en el nuevo Dashboard de Alta Frecuencia.
-
 ```css
 :root {
   /* Fondo general y layout (Estilo Navy Dark) */

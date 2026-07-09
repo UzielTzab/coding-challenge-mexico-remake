@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
-import { useDashboardSocket } from '../composables/useDashboardSocket';
 import { getDashboardSummary, getExchanges } from '../services/dashboard.service';
 import { useMarketStore } from '../stores/market.store';
 import { useOpportunitiesStore } from '../stores/opportunities.store';
@@ -10,7 +9,6 @@ import OpportunityTable from '../components/dashboard/OpportunityTable.vue';
 import PerformanceCharts from '../components/dashboard/PerformanceCharts.vue';
 import AppSkeleton from '../components/ui/AppSkeleton.vue';
 
-const { connect } = useDashboardSocket();
 const marketStore = useMarketStore();
 const oppStore = useOpportunitiesStore();
 const isLoading = ref(true);
@@ -23,7 +21,6 @@ const averageBtcPrice = computed(() => {
 });
 
 onMounted(async () => {
-  connect();
   try {
     const data = await getDashboardSummary();
     let result = data.results ? data.results : data;

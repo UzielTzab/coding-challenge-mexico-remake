@@ -1,6 +1,6 @@
 # ArbiBTC: Motor HFT de Arbitraje
 
-Este repositorio contiene la entrega final del **Bot de Arbitraje Institucional** para la gran final del Hackathon. El sistema ha sido diseñado desde cero bajo una arquitectura de microservicios robusta, orientada al máximo rendimiento, gestión de riesgo de grado Wall-Street y neutralidad de portafolio.
+Este repositorio contiene la entrega final del **Bot de Arbitraje de BTC** para la gran final del Hackathon. El sistema ha sido diseñado desde cero bajo una arquitectura de microservicios robusta, orientada al máximo rendimiento, gestión de riesgo de grado Wall-Street y neutralidad de portafolio.
 
 ## Arquitectura y Stack Tecnológico
 

@@ -60,6 +60,10 @@ export const useDashboardSocket = () => {
             if (botStore.status !== 'running') {
               opp.status = 'discarded';
               oppStore.prepend(opp);
+              oppStore.setSummary({
+                discarded_opportunities: oppStore.summary.discarded_opportunities + 1,
+                opportunities_count: oppStore.summary.opportunities_count + 1
+              });
               break; // No mostramos snackbar porque el bot está apagado
             }
 
@@ -69,9 +73,20 @@ export const useDashboardSocket = () => {
               uiStore.showSnackbar(`<strong>Emergency Hedge:</strong> Slippage crítico en arbitraje. Cubriendo posición.`, 'critical', 6000);
             } else if (opp.status === 'legging_hedge') {
               uiStore.showSnackbar(`<strong>Legging Risk Detectado:</strong> Pata 2 falló. Ejecutando Market Dump.`, 'warning', 6000);
-            } else if (opp.status === 'executed' || opp.status === 'profitable') {
-              // Silenciamos las tostadas verdes para evitar "flooding" visual en HFT real
-              // Feedback se refleja en las tablas y KPIs.
+            }
+            
+            // UPDATE PNL & STATS
+            if (opp.status === 'executed' || opp.status === 'legging_hedge' || opp.status === 'emergency_hedge') {
+              oppStore.updateGlobalPnl(oppStore.totalPnl + parseFloat(opp.net_profit || 0));
+              oppStore.setSummary({
+                trades_count: oppStore.summary.trades_count + 1,
+                opportunities_count: oppStore.summary.opportunities_count + 1
+              });
+            } else if (opp.status === 'discarded') {
+              oppStore.setSummary({
+                discarded_opportunities: oppStore.summary.discarded_opportunities + 1,
+                opportunities_count: oppStore.summary.opportunities_count + 1
+              });
             }
             break;
           }
