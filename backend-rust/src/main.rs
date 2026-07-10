@@ -8,9 +8,8 @@ use std::net::SocketAddr;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Inicializar el sistema de logging
-    tracing_subscriber::fmt::init();
-
-    tracing::info!("Inicializando Engine HFT de Arbitraje...");
+    tracing_subscriber::fmt::init(); //Es una librería que se importa directamente, librería que está en el Cargo.toml
+    tracing::info!("Inicializando Engine HFT de Arbitraje..."); //Emite eventos que emiten información para que el suscriber la escuche
 
     // 1. Cargar configuración
     let settings = config::settings::Settings::load();

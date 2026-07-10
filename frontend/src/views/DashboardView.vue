@@ -23,7 +23,7 @@ const averageBtcPrice = computed(() => {
 onMounted(async () => {
   try {
     const data = await getDashboardSummary();
-    let result = data.results ? data.results : data;
+    let result = (data as any).results ? (data as any).results : data;
     if (Array.isArray(result) && result.length > 0) result = result[0];
     
     if (result) {
@@ -42,7 +42,7 @@ onMounted(async () => {
 
   try {
     const exData = await getExchanges();
-    const exchanges = exData.results || exData;
+    const exchanges = (exData as any).results || exData;
     if (Array.isArray(exchanges)) {
       exchanges.forEach((ex: any) => {
         marketStore.upsertSnapshot({
