@@ -2,7 +2,7 @@ use axum::{extract::{State, Query}, Json};
 use std::sync::Arc;
 use crate::api::handlers::AppState;
 use crate::db::queries;
-use crate::api::dto::{PerformanceDto, OpportunityDto, PaginatedOpportunitiesDto};
+use crate::api::dto::{PerformanceDto, OpportunityDto, PaginatedOpportunitiesDto, PaginationQuery};
 
 pub async fn get_performance(State(state): State<Arc<AppState>>) -> Json<Vec<PerformanceDto>> {
     if let Some(pool) = &state.pool {
@@ -77,10 +77,4 @@ pub async fn get_opportunities(State(state): State<Arc<AppState>>, Query(query):
         page,
         limit,
     })
-}
-
-#[derive(serde::Deserialize)]
-pub struct PaginationQuery {
-    pub page: Option<u32>,
-    pub limit: Option<u32>,
 }

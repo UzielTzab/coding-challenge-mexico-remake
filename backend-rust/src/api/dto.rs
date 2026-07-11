@@ -1,4 +1,10 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
+
+#[derive(Deserialize)]
+pub struct PaginationQuery {
+    pub page: Option<u32>,
+    pub limit: Option<u32>,
+}
 
 #[derive(Serialize)]
 pub struct PerformanceDto {
