@@ -15,11 +15,11 @@
   --color-text-secondary: #94A3B8;
   --color-text-muted: #64748B;
   
-  /* Acentos y Branding */
-  --color-primary: #3B82F6;
-  --color-primary-light: #ffdd00;
-  --color-primary-dark: #2563EB;
-  --gradient-primary: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  /* Acentos y Branding (Green from image) */
+  --color-primary: #10B981;
+  --color-primary-light: #34D399;
+  --color-primary-dark: #059669;
+  --gradient-primary: linear-gradient(135deg, #34D399 0%, #10B981 100%);
   
   /* Estados / Semántica */
   --color-success: #10B981; /* Verde vibrante minimalista */

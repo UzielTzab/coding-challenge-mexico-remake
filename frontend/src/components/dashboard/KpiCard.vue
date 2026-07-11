@@ -10,6 +10,9 @@ interface Props {
   suffix?: string;
   subtextHtml?: string;
   decimals?: string | number;
+  iconSvg?: string;
+  iconBgColor?: string;
+  iconColor?: string;
 }
 
 defineProps<Props>();
@@ -24,16 +27,21 @@ const formatNumber = (val: number, props: Props) => {
 
 <template>
   <AppCard class="kpi-card" variant="soft">
-    <div class="kpi-label uppercase-label">{{ title }}</div>
+    <div class="kpi-header">
+      <div class="kpi-label uppercase-label">{{ title }}</div>
+      <div v-if="iconSvg" class="kpi-icon-wrapper" :style="{ backgroundColor: iconBgColor, color: iconColor }" v-html="iconSvg"></div>
+    </div>
     <div class="kpi-value-row">
       <span class="kpi-value numeric">
         {{ prefix }}<AnimatedNumber v-if="typeof value === 'number'" :value="value" :format="(v) => formatNumber(v, $props)" /><template v-else>{{ value }}</template>{{ suffix }}
       </span>
-      <span v-if="variation" class="kpi-variation" :class="variation > 0 ? 'text-success' : 'text-danger'">
-        {{ variation > 0 ? '▲' : '▼' }} {{ Math.abs(variation) }}%
-      </span>
     </div>
-    <div v-if="subtextHtml" class="kpi-subtext" v-html="subtextHtml"></div>
+    <div class="kpi-footer">
+      <span v-if="variation" class="kpi-variation" :class="variation > 0 ? 'text-success' : 'text-danger'">
+        {{ variation > 0 ? '↗' : '↘' }} {{ Math.abs(variation) }}% <span class="variation-text">vs ayer</span>
+      </span>
+      <div v-if="subtextHtml" class="kpi-subtext" v-html="subtextHtml"></div>
+    </div>
   </AppCard>
 </template>
 
@@ -45,11 +53,41 @@ const formatNumber = (val: number, props: Props) => {
   gap: 8px;
   padding: 20px 24px;
 }
-.kpi-label { margin-bottom: 4px; }
+.kpi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kpi-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.1);
+}
+
+.kpi-icon-wrapper :deep(svg) {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.kpi-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .kpi-value-row {
   display: flex;
   align-items: baseline;
   gap: 12px;
+  margin-top: 8px;
 }
 .kpi-value {
   font-size: 28px;
@@ -58,12 +96,25 @@ const formatNumber = (val: number, props: Props) => {
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
+
+.kpi-footer {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
 .kpi-variation {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 4px 8px;
-  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.kpi-variation.text-success { color: var(--color-success); }
+.kpi-variation.text-danger { color: var(--color-danger); }
+
+.variation-text {
+  color: var(--color-text-muted);
+  font-weight: 400;
 }
 
 .kpi-subtext {

@@ -12,7 +12,16 @@ export const useOpportunitiesStore = defineStore('opportunities', () => {
     trades_count: 0,
     discarded_opportunities: 0,
     opportunities_count: 0,
-    average_cost: 0
+    average_cost: 0,
+    total_volume: 4.2712, // Inicializado con mock, se actualizará dinámicamente
+    average_spread: 0.042, // Inicializado con mock, se actualizará dinámicamente
+    variations: {
+      pnl: 12.4,
+      win_rate: 0.01,
+      trades: 8,
+      cost: -3.2,
+      btc_price: 1.1
+    }
   });
 
   const prepend = (opp: Opportunity) => {
