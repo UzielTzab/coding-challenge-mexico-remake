@@ -55,7 +55,9 @@ pub async fn get_performance(pool: &PgPool) -> Result<super::models::TradePerfor
             SUM(net_profit_usd) as total_pnl_usd, 
             COUNT(CASE WHEN execution_status IN ('executed', 'emergency_hedge') THEN 1 END) as total_trades,
             COUNT(CASE WHEN execution_status = 'discarded' THEN 1 END) as discarded_opportunities,
-            SUM(gross_profit_usd - net_profit_usd) as total_fees_usd
+            SUM(gross_profit_usd - net_profit_usd) as total_fees_usd,
+            SUM(CASE WHEN execution_status IN ('executed', 'emergency_hedge') THEN volume_btc ELSE 0 END) as total_volume_btc,
+            AVG(CASE WHEN execution_status IN ('executed', 'emergency_hedge') THEN (sell_price_usd - buy_price_usd) / buy_price_usd * 100 END) as average_spread_pct
          FROM trades"
     )
     .fetch_one(pool)

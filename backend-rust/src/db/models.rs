@@ -21,6 +21,8 @@ pub struct TradePerformance {
     pub total_trades: Option<i64>,
     pub discarded_opportunities: Option<i64>,
     pub total_fees_usd: Option<rust_decimal::Decimal>,
+    pub total_volume_btc: Option<rust_decimal::Decimal>,
+    pub average_spread_pct: Option<rust_decimal::Decimal>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, sqlx::FromRow)]

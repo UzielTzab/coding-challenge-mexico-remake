@@ -20,6 +20,7 @@ const selectedOpportunity = ref<any>(null);
 const currentPage = ref(1);
 const totalRecords = ref(0);
 const currentFilters = ref({});
+const tableData = ref<any[]>([]);
 
 const columns = [
   { key: 'id', label: 'ID' },
@@ -31,14 +32,14 @@ const columns = [
   { key: 'timestamp', label: 'Fecha' }
 ];
 
-const data = computed(() => store.items);
+const data = computed(() => tableData.value);
 
 const loadData = async (filters = {}) => {
   isLoading.value = true;
   try {
     const result = await getOpportunities({ ...filters, page: currentPage.value, limit: 10 });
     totalRecords.value = result.total_items || 0;
-    store.items = result.data || result;
+    tableData.value = result.data || result;
   } catch (error) {
     console.error('Error fetching opportunities:', error);
   } finally {

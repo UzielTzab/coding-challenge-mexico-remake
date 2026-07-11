@@ -32,7 +32,10 @@ onMounted(async () => {
         trades_count: result.total_trades || 0,
         discarded_opportunities: result.discarded_opportunities || 0,
         opportunities_count: (result.total_trades || 0) + (result.discarded_opportunities || 0),
-        average_cost: parseFloat(result.total_fees_usd) || 0
+        average_cost: parseFloat(result.total_fees_usd) || 0,
+        total_volume: parseFloat(result.total_volume_btc) || 0,
+        average_spread: parseFloat(result.average_spread_pct)?.toFixed(3) || 0,
+        variations: result.variations || { pnl: 0, win_rate: 0, trades: 0, cost: 0, btc_price: 0 }
       });
       oppStore.setInitialPnl(parseFloat(result.total_pnl_usd) || 0);
     }

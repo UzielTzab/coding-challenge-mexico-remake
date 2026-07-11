@@ -7,12 +7,24 @@ pub struct PaginationQuery {
 }
 
 #[derive(Serialize)]
+pub struct VariationsDto {
+    pub pnl: f64,
+    pub win_rate: f64,
+    pub trades: i64,
+    pub cost: f64,
+    pub btc_price: f64,
+}
+
+#[derive(Serialize)]
 pub struct PerformanceDto {
     pub total_pnl_usd: String,
     pub total_fees_usd: String,
     pub total_trades: i64,
     pub discarded_opportunities: i64,
     pub win_rate_percent: String,
+    pub total_volume_btc: String,
+    pub average_spread_pct: String,
+    pub variations: VariationsDto,
 }
 
 #[derive(Serialize)]

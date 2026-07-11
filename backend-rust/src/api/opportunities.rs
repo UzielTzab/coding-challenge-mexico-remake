@@ -2,7 +2,7 @@ use axum::{extract::{State, Query}, Json};
 use std::sync::Arc;
 use crate::api::handlers::AppState;
 use crate::db::queries;
-use crate::api::dto::{PerformanceDto, OpportunityDto, PaginatedOpportunitiesDto, PaginationQuery};
+use crate::api::dto::{PerformanceDto, OpportunityDto, PaginatedOpportunitiesDto, PaginationQuery, VariationsDto};
 
 pub async fn get_performance(State(state): State<Arc<AppState>>) -> Json<Vec<PerformanceDto>> {
     if let Some(pool) = &state.pool {
@@ -13,11 +13,21 @@ pub async fn get_performance(State(state): State<Arc<AppState>>) -> Json<Vec<Per
             let trades = perf.total_trades.unwrap_or(0);
             let discarded = perf.discarded_opportunities.unwrap_or(0);
             
+            let volume = perf.total_volume_btc.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
+            let spread = perf.average_spread_pct.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
+
             // Calculamos el win rate real
             let total_ops = trades + discarded;
             let win_rate = if total_ops > 0 { 
                 (trades as f64 / total_ops as f64) * 100.0 
             } else { 0.0 };
+            
+            // Simulamos variaciones diarias (lógica mock hasta que exista historial multidiario real en BD)
+            let var_pnl = if profit > 0.0 { 12.4 } else { 0.0 }; 
+            let var_win_rate = 0.01;
+            let var_trades = 8;
+            let var_cost = -3.2;
+            let var_btc_price = 1.1;
 
             return Json(vec![PerformanceDto {
                 total_pnl_usd: profit.to_string(),
@@ -25,6 +35,15 @@ pub async fn get_performance(State(state): State<Arc<AppState>>) -> Json<Vec<Per
                 total_trades: trades,
                 discarded_opportunities: discarded,
                 win_rate_percent: win_rate.to_string(),
+                total_volume_btc: volume.to_string(),
+                average_spread_pct: spread.to_string(),
+                variations: VariationsDto {
+                    pnl: var_pnl,
+                    win_rate: var_win_rate,
+                    trades: var_trades,
+                    cost: var_cost,
+                    btc_price: var_btc_price,
+                }
             }]);
         }
     }
@@ -34,6 +53,9 @@ pub async fn get_performance(State(state): State<Arc<AppState>>) -> Json<Vec<Per
         total_trades: 0,
         discarded_opportunities: 0,
         win_rate_percent: "0.0".to_string(),
+        total_volume_btc: "0.0".to_string(),
+        average_spread_pct: "0.0".to_string(),
+        variations: VariationsDto { pnl: 0.0, win_rate: 0.0, trades: 0, cost: 0.0, btc_price: 0.0 },
     }])
 }
 
