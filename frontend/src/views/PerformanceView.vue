@@ -55,7 +55,8 @@ const loadAnalytics = async () => {
         d.setMinutes(d.getMinutes() - (dataPoints - i) * 5); // Cada punto es de hace 5 mins
         history.push({
           date: `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`,
-          value: i === dataPoints ? currentPnl : mockPnl + (Math.random() * increment * 0.5)
+          value: i === dataPoints ? currentPnl : mockPnl + (Math.random() * increment * 0.5),
+          time: d.getTime() / 1000
         });
         mockPnl += increment;
       }
@@ -89,7 +90,8 @@ watch(() => store.totalPnl, (newPnl) => {
     const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
     analytics.value.pnl_history.push({
       date: timeStr,
-      value: newPnl
+      value: newPnl,
+      time: d.getTime() / 1000
     });
     
     if (analytics.value.pnl_history.length > 20) {
