@@ -18,12 +18,8 @@ const spread = computed(() => {
 });
 
 const timeAgo = computed(() => {
-  if (!props.marketData || !props.marketData.timestamp) return 'Hace -';
-  const diff = Date.now() - new Date(props.marketData.timestamp).getTime();
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `Hace ${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  return `Hace ${minutes}m`;
+  if (!props.marketData || !props.marketData.timestamp) return 'Conectando...';
+  return `En vivo`;
 });
 
 const realVolume = computed(() => {
@@ -166,7 +162,27 @@ const formatPriceCompact = (val: number) => {
 
 .time-ago {
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: var(--color-success);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.time-ago::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-success);
+  animation: pulse-live 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-live {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px var(--color-success); }
+  100% { transform: scale(0.8); opacity: 0.5; }
 }
 
 .latency {
