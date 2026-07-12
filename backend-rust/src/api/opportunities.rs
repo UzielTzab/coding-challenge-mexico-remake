@@ -77,6 +77,7 @@ pub async fn get_opportunities(State(state): State<Arc<AppState>>, Query(query):
                     sell_exchange: t.sell_exchange,
                     buy_price: f64::from_str(&t.buy_price_usd.to_string()).unwrap_or(0.0),
                     sell_price: f64::from_str(&t.sell_price_usd.to_string()).unwrap_or(0.0),
+                    volume_btc: f64::from_str(&t.volume_btc.to_string()).unwrap_or(0.0),
                     gross_margin: f64::from_str(&t.gross_profit_usd.to_string()).unwrap_or(0.0),
                     net_profit: f64::from_str(&t.net_profit_usd.to_string()).unwrap_or(0.0),
                     is_partial_fill: t.execution_status == "emergency_hedge",

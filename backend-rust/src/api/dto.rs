@@ -35,6 +35,7 @@ pub struct OpportunityDto {
     pub sell_exchange: String,
     pub buy_price: f64,
     pub sell_price: f64,
+    pub volume_btc: f64,
     pub gross_margin: f64,
     pub net_profit: f64,
     pub is_partial_fill: bool,
