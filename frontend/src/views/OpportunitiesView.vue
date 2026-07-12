@@ -99,7 +99,7 @@ watch(() => store.summary.opportunities_count, (newVal, oldVal) => {
           <span class="numeric text-success">+{{ formatUSD(item.net_profit || 0) }}</span>
         </template>
         <template #cell-profit_percent="{ item }">
-          <span class="numeric text-success">{{ formatPercent(item.net_profit_percent || 0) }}</span>
+          <span class="numeric text-success">{{ formatPercent(((item.net_profit || item.net_profit_usd || 0) / (item.buy_price || item.buy_price_usd || 60000)) * 100) }}</span>
         </template>
         <template #cell-status="{ item }">
           <OpportunityStatusBadge :status="item.status || 'detected'" />

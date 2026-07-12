@@ -40,26 +40,26 @@ const handleRowClick = (row: any) => {
         <span class="text-muted">#{{ item.id }}</span>
       </template>
       <template #cell-symbol="{ item }">
-        <strong>{{ item.symbol }}</strong>
+        <strong>BTC/USDT</strong>
       </template>
       <template #cell-route="{ item }">
-        <span>{{ item.buy_exchange_name }} → {{ item.sell_exchange_name }}</span>
+        <span style="text-transform: capitalize;">{{ item.buy_exchange }} → {{ item.sell_exchange }}</span>
       </template>
       <template #cell-quantity_btc="{ item }">
-        <span class="numeric">{{ item.quantity_btc }}</span>
+        <span class="numeric">{{ item.volume_btc }}</span>
       </template>
       <template #cell-net_profit="{ item }">
-        <span :class="parseFloat(item.net_profit) >= 0 ? 'text-success' : 'text-danger'">
-          {{ formatUSD(parseFloat(item.net_profit)) }}
+        <span :class="parseFloat(item.net_profit_usd) >= 0 ? 'text-success' : 'text-danger'">
+          {{ formatUSD(parseFloat(item.net_profit_usd || item.net_profit || 0)) }}
         </span>
       </template>
       <template #cell-status="{ item }">
-        <span :class="item.status === 'executed' ? 'text-success' : 'text-danger'">
-          {{ item.status.toUpperCase() }}
+        <span :class="(item.execution_status || item.status) === 'executed' ? 'text-success' : 'text-danger'">
+          {{ (item.execution_status || item.status || 'unknown').toUpperCase() }}
         </span>
       </template>
       <template #cell-executed_at="{ item }">
-        <span class="text-muted">{{ formatDate(item.executed_at) }}</span>
+        <span class="text-muted">{{ formatDate(item.timestamp || item.executed_at) }}</span>
       </template>
     </AppTable>
   </div>
