@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import AppCard from '../components/ui/AppCard.vue';
 import WalletCard from '../components/wallets/WalletCard.vue';
 import WalletMovementTable from '../components/wallets/WalletMovementTable.vue';
@@ -21,7 +21,7 @@ const loadData = async () => {
   try {
     const [walletsData, movementsData] = await Promise.all([
       getWallets(),
-      getWalletMovements({ page: currentPage.value })
+      getWalletMovements({ page: currentPage.value, limit: 50 })
     ]);
     
     const wResults = walletsData.results || walletsData;
@@ -49,8 +49,19 @@ const handlePageChange = (page: number) => {
   loadData();
 };
 
+let intervalId: any;
+
 onMounted(() => {
   loadData();
+  intervalId = setInterval(() => {
+    if (currentPage.value === 1 && !isLoading.value) {
+      loadData();
+    }
+  }, 5000);
+});
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId);
 });
 </script>
 

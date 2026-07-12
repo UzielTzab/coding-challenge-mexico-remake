@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import AppCard from '../components/ui/AppCard.vue';
 import OperationHistoryTable from '../components/operations/OperationHistoryTable.vue';
 import AppPagination from '../components/ui/AppPagination.vue';
 import { getTrades } from '../services/trades.service';
+import { useOpportunitiesStore } from '../stores/opportunities.store';
+
+const store = useOpportunitiesStore();
 
 const isLoading = ref(false);
 const operations = ref<any[]>([]);
@@ -31,6 +34,12 @@ const handlePageChange = (page: number) => {
 
 onMounted(() => {
   loadData();
+});
+
+watch(() => store.summary.trades_count, (newVal, oldVal) => {
+  if (newVal > oldVal && currentPage.value === 1) {
+    loadData();
+  }
 });
 </script>
 

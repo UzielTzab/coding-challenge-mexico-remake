@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import AppCard from '../components/ui/AppCard.vue';
 import AppTable from '../components/ui/AppTable.vue';
 import OpportunityFilters from '../components/opportunities/OpportunityFilters.vue';
@@ -65,6 +65,13 @@ const openDetail = (row: any) => {
 
 onMounted(() => {
   loadData();
+});
+
+watch(() => store.summary.opportunities_count, (newVal, oldVal) => {
+  if (newVal > oldVal && currentPage.value === 1) {
+    // Reload silently when a new opportunity is detected and we are on page 1
+    loadData(currentFilters.value);
+  }
 });
 </script>
 

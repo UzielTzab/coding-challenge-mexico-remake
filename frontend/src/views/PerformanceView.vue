@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import MetricCard from '../components/performance/MetricCard.vue';
 import PnlLineChart from '../components/performance/PnlLineChart.vue';
 import OpportunityStatusDonut from '../components/performance/OpportunityStatusDonut.vue';
@@ -7,6 +7,9 @@ import api from '../services/http'; // Para el endpoint de analytics
 import { useFormatters } from '../composables/useFormatters';
 import AppSkeleton from '../components/ui/AppSkeleton.vue';
 import AppButton from '../components/ui/AppButton.vue';
+import { useOpportunitiesStore } from '../stores/opportunities.store';
+
+const store = useOpportunitiesStore();
 
 const { formatUSD } = useFormatters();
 
@@ -78,6 +81,35 @@ const loadAnalytics = async () => {
 
 onMounted(() => {
   loadAnalytics();
+});
+
+watch(() => store.totalPnl, (newPnl) => {
+  if (analytics.value.pnl_history.length > 0) {
+    const d = new Date();
+    const timeStr = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    analytics.value.pnl_history.push({
+      date: timeStr,
+      value: newPnl
+    });
+    
+    if (analytics.value.pnl_history.length > 20) {
+      analytics.value.pnl_history.shift();
+    }
+    
+    // Force reactivity for the chart component
+    analytics.value.pnl_history = [...analytics.value.pnl_history];
+    
+    // Update global metrics from store
+    analytics.value.global_pnl = newPnl;
+    analytics.value.global_win_rate = store.summary.global_win_rate;
+    analytics.value.trades_count = store.summary.trades_count;
+    
+    analytics.value.status_stats = {
+      ...analytics.value.status_stats,
+      executed: store.summary.trades_count,
+      discarded: store.summary.discarded_opportunities
+    };
+  }
 });
 </script>
 
