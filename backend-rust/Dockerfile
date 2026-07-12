@@ -1,4 +1,4 @@
-FROM rust:latest
+FROM rust:slim
 WORKDIR /app
 
 # Instalar dependencias del sistema requeridas para tokio-tungstenite y ssl
