@@ -22,6 +22,9 @@ services:
   backend:
     build: 
       context: ./backend-rust
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "8000:8000"
     environment:
