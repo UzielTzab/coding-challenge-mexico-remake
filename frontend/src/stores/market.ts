@@ -31,7 +31,8 @@ export const useMarketStore = defineStore('market', () => {
   }
 
   // WebSocket initialization
-  const ws = new WebSocket('ws://localhost:8000/ws/market')
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const ws = new WebSocket(`${wsProtocol}//${window.location.host}/ws/market`)
 
   ws.onopen = () => {
     isConnected.value = true

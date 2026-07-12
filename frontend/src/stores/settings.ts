@@ -8,7 +8,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   const fetchConfiguration = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/settings')
+      const response = await fetch('/api/settings')
       if (response.ok) {
         const data = await response.json()
         if (data.slippage !== undefined) slippage.value = data.slippage
@@ -22,7 +22,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   const saveConfiguration = async () => {
     try {
-      await fetch('http://localhost:8000/api/settings', {
+      await fetch('/api/settings', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

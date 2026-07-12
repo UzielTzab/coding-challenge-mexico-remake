@@ -7,7 +7,8 @@ import { useUiStore } from '../stores/ui.store';
 import { useBotStore } from '../stores/bot.store';
 
 export const useDashboardSocket = () => {
-  const wsUrl = (import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000') + '/ws/market';
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = (import.meta.env.VITE_WS_BASE_URL || `${wsProtocol}//${window.location.host}`) + '/ws/market';
   const { ws, isConnected, connect } = useWebSocket(wsUrl);
   
   const marketStore = useMarketStore();
