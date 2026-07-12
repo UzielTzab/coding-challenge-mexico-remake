@@ -10,10 +10,11 @@ use sqlx::PgPool;
 pub struct AppState {
     pub redis_url: String,
     pub pool: Option<PgPool>,
+    pub discarded_ticks: Arc<std::sync::atomic::AtomicU64>,
 }
 
-pub fn router(redis_url: String, pool: Option<PgPool>) -> Router {
-    let state = Arc::new(AppState { redis_url, pool });
+pub fn router(redis_url: String, pool: Option<PgPool>, discarded_ticks: Arc<std::sync::atomic::AtomicU64>) -> Router {
+    let state = Arc::new(AppState { redis_url, pool, discarded_ticks });
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)

@@ -51,7 +51,12 @@ struct SharedState {
     last_trade_time: Option<u64>,
 }
 
-pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>) {
+pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarded_ticks: Arc<std::sync::atomic::AtomicU64>) {
+    info!("Iniciando WebSocket HFT hacia Binance y Kraken...");
+
+    // Canales MPMC (multi-producer multi-consumer) internos
+    let (tx, mut rx) = tokio::sync::mpsc::unbounded_channel::<MarketTick>();
+
     let state = Arc::new(RwLock::new(SharedState {
         binance_tick: None,
         kraken_tick: None,
@@ -194,6 +199,7 @@ async fn check_arbitrage(
     state: Arc<RwLock<SharedState>>,
     redis_conn: &mut redis::aio::Connection,
     pool: Option<PgPool>,
+    discarded_ticks: Arc<std::sync::atomic::AtomicU64>,
 ) {
     let (binance_tick, kraken_tick) = {
         let r = state.read().await;
@@ -227,6 +233,7 @@ async fn check_arbitrage(
             "executed" 
         };
 
+
         let mut is_active = false;
         if let Some(p) = &pool {
             if let Ok(settings) = crate::db::queries::get_settings(p).await {
@@ -240,6 +247,8 @@ async fn check_arbitrage(
 
         if !is_active {
             opp_status = "discarded";
+            // Incrementamos ticks descartados porque el bot está en pausa pero evaluó un tick
+            discarded_ticks.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         }
         
         // REBALANCEO TRIANGULAR (Ejecución Simulada con DB) Y DELTA NEUTRALITY
@@ -350,6 +359,9 @@ async fn check_arbitrage(
         if let Ok(opp_json) = serde_json::to_string(&opp_event) {
             let _ = redis_conn.publish::<_, _, ()>("market:spreads", opp_json).await;
         }
+    } else {
+        // El spread no fue rentable (ArbitrageResult == None)
+        discarded_ticks.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
     }
 }
 

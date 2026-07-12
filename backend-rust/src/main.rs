@@ -45,14 +45,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // 4. Crear las rutas base de Axum
-    let app = api::handlers::router(settings.redis_url.clone(), pool.clone());
+    // 4. Crear el contador atómico de ticks descartados en RAM
+    let discarded_ticks = std::sync::Arc::new(std::sync::atomic::AtomicU64::new(0));
 
-    // 5. Iniciar la conexión a Binance y publicación a Redis en background
+    // 5. Crear las rutas base de Axum
+    let app = api::handlers::router(settings.redis_url.clone(), pool.clone(), discarded_ticks.clone());
+
+    // 6. Iniciar la conexión a Binance y publicación a Redis en background
     let redis_url_for_stream = settings.redis_url.clone();
     let pool_for_stream = pool.clone();
+    let ticks_for_stream = discarded_ticks.clone();
     tokio::spawn(async move {
-        engine::market_stream::run_market_stream(redis_url_for_stream, pool_for_stream).await;
+        engine::market_stream::run_market_stream(redis_url_for_stream, pool_for_stream, ticks_for_stream).await;
     });
 
     // 6. Iniciar el Engine de Rebalanceo y Garbage Collection (si hay BD)

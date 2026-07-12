@@ -67,7 +67,6 @@ watch(filters, () => {
   background: var(--color-bg-secondary);
   padding: 16px 24px;
   border-radius: var(--radius-md);
-  margin-bottom: 24px;
 }
 
 .filter-group {

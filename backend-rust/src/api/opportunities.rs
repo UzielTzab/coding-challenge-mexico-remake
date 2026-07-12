@@ -11,7 +11,9 @@ pub async fn get_performance(State(state): State<Arc<AppState>>) -> Json<Vec<Per
             let profit = perf.total_pnl_usd.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
             let fees = perf.total_fees_usd.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
             let trades = perf.total_trades.unwrap_or(0);
-            let discarded = perf.discarded_opportunities.unwrap_or(0);
+            let db_discarded = perf.discarded_opportunities.unwrap_or(0);
+            let mem_discarded = state.discarded_ticks.load(std::sync::atomic::Ordering::Relaxed) as i64;
+            let discarded = db_discarded + mem_discarded;
             
             let volume = perf.total_volume_btc.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
             let spread = perf.average_spread_pct.map(|d| f64::from_str(&d.to_string()).unwrap_or(0.0)).unwrap_or(0.0);
