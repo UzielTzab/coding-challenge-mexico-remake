@@ -1,14 +1,12 @@
-FROM rust:slim
+FROM rust:slim AS builder
 WORKDIR /app
-
-# Instalar dependencias del sistema requeridas para tokio-tungstenite y ssl
 RUN apt-get update && apt-get install -y pkg-config libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
-
-# Copiar el código
 COPY . .
+RUN cargo build --release
 
-# Exponer el puerto
+FROM debian:bookworm-slim
+WORKDIR /app
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/target/release/backend-rust /usr/local/bin/backend-rust
 EXPOSE 8000
-
-# Para entornos de desarrollo usamos cargo run.
-CMD ["cargo", "run"]
+CMD ["backend-rust"]
