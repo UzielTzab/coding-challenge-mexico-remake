@@ -47,7 +47,6 @@ impl ArbitrageEngine {
         } else {
             None
         }
-    }
 }
 
 #[cfg(test)]
@@ -91,3 +90,5 @@ mod tests {
         assert!(result.is_none());
     }
 }
+
+

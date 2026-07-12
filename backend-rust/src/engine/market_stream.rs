@@ -66,6 +66,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
     let redis_url_clone = redis_url.clone();
     let state_binance = state.clone();
     let pool_binance = pool.clone();
+    let discarded_ticks_binance = discarded_ticks.clone();
 
     // Tarea 1: Binance
     tokio::spawn(async move {
@@ -112,7 +113,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
                                     let _ = redis_conn.publish::<_, _, ()>("market:spreads", j).await;
                                 }
 
-                                check_arbitrage(state_binance.clone(), &mut redis_conn, pool_binance.clone()).await;
+                                check_arbitrage(state_binance.clone(), &mut redis_conn, pool_binance.clone(), discarded_ticks_binance.clone()).await;
                             }
                         }
                     }
@@ -124,6 +125,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
 
     let state_kraken = state.clone();
     let pool_kraken = pool.clone();
+    let discarded_ticks_kraken = discarded_ticks.clone();
 
     // Tarea 2: Kraken
     tokio::spawn(async move {
@@ -178,7 +180,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
                                         let _ = redis_conn.publish::<_, _, ()>("market:spreads", j).await;
                                     }
 
-                                    check_arbitrage(state_kraken.clone(), &mut redis_conn, pool_kraken.clone()).await;
+                                    check_arbitrage(state_kraken.clone(), &mut redis_conn, pool_kraken.clone(), discarded_ticks_kraken.clone()).await;
                                 }
                             }
                         }
