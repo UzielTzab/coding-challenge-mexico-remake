@@ -72,7 +72,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
     tokio::spawn(async move {
         let redis_client = redis::Client::open(redis_url_clone).expect("Failed to create Redis client");
         let mut redis_conn = redis_client.get_tokio_connection().await.unwrap();
-        let ws_url = Url::parse("wss://stream.binance.com:9443/ws/btcusdt@bookTicker").unwrap();
+        let ws_url = Url::parse("wss://stream.binance.us:9443/ws/btcusdt@bookTicker").unwrap();
 
         loop {
             info!("Connecting to Binance WS...");
