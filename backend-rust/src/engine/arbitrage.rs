@@ -47,6 +47,7 @@ impl ArbitrageEngine {
         } else {
             None
         }
+    }
 }
 
 #[cfg(test)]
