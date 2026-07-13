@@ -2,7 +2,6 @@
 import { ref, onMounted, watch } from 'vue';
 import AppCard from '../components/ui/AppCard.vue';
 import OperationHistoryTable from '../components/operations/OperationHistoryTable.vue';
-import OpportunityFilters from '../components/opportunities/OpportunityFilters.vue';
 import AppPagination from '../components/ui/AppPagination.vue';
 import { getTrades } from '../services/trades.service';
 import { useOpportunitiesStore } from '../stores/opportunities.store';
@@ -14,12 +13,11 @@ const operations = ref<any[]>([]);
 
 const currentPage = ref(1);
 const totalRecords = ref(0);
-const currentFilters = ref({});
 
-const loadData = async (filters = currentFilters.value) => {
+const loadData = async () => {
   isLoading.value = true;
   try {
-    const result = await getTrades({ ...filters, page: currentPage.value, limit: 10 });
+    const result = await getTrades({ page: currentPage.value, limit: 10 });
     totalRecords.value = result.total_items || 0;
     operations.value = result.data || result;
   } catch (error) {
@@ -31,12 +29,6 @@ const loadData = async (filters = currentFilters.value) => {
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
-  loadData();
-};
-
-const handleFilter = (filters: any) => {
-  currentFilters.value = filters;
-  currentPage.value = 1;
   loadData();
 };
 
@@ -59,8 +51,6 @@ watch(() => store.summary.trades_count, (newVal, oldVal) => {
         <p class="text-muted">Historial de órdenes de compra/venta enviadas a los exchanges.</p>
       </div>
     </div>
-    
-    <OpportunityFilters @filter="handleFilter" />
     
     <div class="operations-layout">
       <AppCard class="history-section">

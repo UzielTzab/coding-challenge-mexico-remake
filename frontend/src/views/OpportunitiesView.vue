@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import AppCard from '../components/ui/AppCard.vue';
 import AppTable from '../components/ui/AppTable.vue';
-import OpportunityFilters from '../components/opportunities/OpportunityFilters.vue';
 import OpportunityDetailDrawer from '../components/opportunities/OpportunityDetailDrawer.vue';
 import OpportunityStatusBadge from '../components/opportunities/OpportunityStatusBadge.vue';
 import AppPagination from '../components/ui/AppPagination.vue';
@@ -19,7 +18,6 @@ const selectedOpportunity = ref<any>(null);
 
 const currentPage = ref(1);
 const totalRecords = ref(0);
-const currentFilters = ref({});
 const tableData = ref<any[]>([]);
 
 const columns = [
@@ -34,10 +32,10 @@ const columns = [
 
 const data = computed(() => tableData.value);
 
-const loadData = async (filters = {}) => {
+const loadData = async () => {
   isLoading.value = true;
   try {
-    const result = await getOpportunities({ ...filters, page: currentPage.value, limit: 10 });
+    const result = await getOpportunities({ page: currentPage.value, limit: 10 });
     totalRecords.value = result.total_items || 0;
     tableData.value = result.data || result;
   } catch (error) {
@@ -47,15 +45,9 @@ const loadData = async (filters = {}) => {
   }
 };
 
-const handleFilter = (filters: any) => {
-  currentFilters.value = filters;
-  currentPage.value = 1;
-  loadData(filters);
-};
-
 const handlePageChange = (page: number) => {
   currentPage.value = page;
-  loadData(currentFilters.value);
+  loadData();
 };
 
 const openDetail = (row: any) => {
@@ -70,7 +62,7 @@ onMounted(() => {
 watch(() => store.summary.opportunities_count, (newVal, oldVal) => {
   if (newVal > oldVal && currentPage.value === 1) {
     // Reload silently when a new opportunity is detected and we are on page 1
-    loadData(currentFilters.value);
+    loadData();
   }
 });
 </script>
@@ -81,8 +73,6 @@ watch(() => store.summary.opportunities_count, (newVal, oldVal) => {
       <h2>Oportunidades de Arbitraje</h2>
       <p class="text-muted">Historial completo de las oportunidades detectadas por el sistema.</p>
     </div>
-    
-    <OpportunityFilters @filter="handleFilter" />
 
     <AppCard>
       <AppTable :columns="columns" :data="data" :loading="isLoading" @row-click="openDetail">
