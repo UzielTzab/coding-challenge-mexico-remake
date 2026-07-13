@@ -49,7 +49,7 @@ const handleRowClick = (row: any) => {
         <span class="numeric">{{ item.volume_btc }}</span>
       </template>
       <template #cell-net_profit="{ item }">
-        <span :class="parseFloat(item.net_profit_usd) >= 0 ? 'text-success' : 'text-danger'">
+        <span :class="parseFloat(item.net_profit_usd || item.net_profit || '0') >= 0 ? 'text-success' : 'text-danger'">
           {{ formatUSD(parseFloat(item.net_profit_usd || item.net_profit || 0)) }}
         </span>
       </template>

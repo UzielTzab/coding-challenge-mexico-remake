@@ -58,8 +58,9 @@ watch(() => store.summary.trades_count, (newVal, oldVal) => {
         <h2>Operaciones Ejecutadas</h2>
         <p class="text-muted">Historial de órdenes de compra/venta enviadas a los exchanges.</p>
       </div>
-      <OpportunityFilters @filter="handleFilter" />
     </div>
+    
+    <OpportunityFilters @filter="handleFilter" />
     
     <div class="operations-layout">
       <AppCard class="history-section">
