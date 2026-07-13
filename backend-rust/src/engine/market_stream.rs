@@ -51,7 +51,7 @@ struct SharedState {
     last_trade_time: Option<u64>,
 }
 
-pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarded_ticks: Arc<std::sync::atomic::AtomicU64>) {
+pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarded_ticks: Arc<std::sync::atomic::AtomicU64>, dyn_config: Arc<std::sync::RwLock<crate::api::handlers::DynamicConfig>>) {
     info!("Iniciando WebSocket HFT hacia Binance y Kraken...");
 
     // Canales MPMC (multi-producer multi-consumer) internos
@@ -67,6 +67,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
     let state_binance = state.clone();
     let pool_binance = pool.clone();
     let discarded_ticks_binance = discarded_ticks.clone();
+    let dyn_config_binance = dyn_config.clone();
 
     // Tarea 1: Binance
     tokio::spawn(async move {
@@ -113,7 +114,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
                                     let _ = redis_conn.publish::<_, _, ()>("market:spreads", j).await;
                                 }
 
-                                check_arbitrage(state_binance.clone(), &mut redis_conn, pool_binance.clone(), discarded_ticks_binance.clone()).await;
+                                check_arbitrage(state_binance.clone(), &mut redis_conn, pool_binance.clone(), discarded_ticks_binance.clone(), dyn_config_binance.clone()).await;
                             }
                         }
                     }
@@ -126,6 +127,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
     let state_kraken = state.clone();
     let pool_kraken = pool.clone();
     let discarded_ticks_kraken = discarded_ticks.clone();
+    let dyn_config_kraken = dyn_config.clone();
 
     // Tarea 2: Kraken
     tokio::spawn(async move {
@@ -180,7 +182,7 @@ pub async fn run_market_stream(redis_url: String, pool: Option<PgPool>, discarde
                                         let _ = redis_conn.publish::<_, _, ()>("market:spreads", j).await;
                                     }
 
-                                    check_arbitrage(state_kraken.clone(), &mut redis_conn, pool_kraken.clone(), discarded_ticks_kraken.clone()).await;
+                                    check_arbitrage(state_kraken.clone(), &mut redis_conn, pool_kraken.clone(), discarded_ticks_kraken.clone(), dyn_config_kraken.clone()).await;
                                 }
                             }
                         }
@@ -202,6 +204,7 @@ async fn check_arbitrage(
     redis_conn: &mut redis::aio::Connection,
     pool: Option<PgPool>,
     discarded_ticks: Arc<std::sync::atomic::AtomicU64>,
+    dyn_config: Arc<std::sync::RwLock<crate::api::handlers::DynamicConfig>>,
 ) {
     let (binance_tick, kraken_tick) = {
         let r = state.read().await;
@@ -211,10 +214,19 @@ async fn check_arbitrage(
         (r.binance_tick.clone().unwrap(), r.kraken_tick.clone().unwrap())
     };
 
-    let risk_manager = RiskManager::new(0.05, 0.01);
-    let arbitrage_engine = ArbitrageEngine::new(risk_manager, 2.0);
+    // Read dynamic config
+    let (min_spread, max_vol, binance_fee, kraken_fee) = {
+        if let Ok(conf) = dyn_config.read() {
+            (conf.min_spread_usd, conf.max_trade_volume_btc, conf.binance_fee_pct, conf.kraken_fee_pct)
+        } else {
+            (5.0, 0.01, 0.001, 0.0026)
+        }
+    };
+
+    let mut risk_manager = RiskManager::new(0.05, 0.01);
+    let engine = ArbitrageEngine::new(risk_manager, min_spread, binance_fee, kraken_fee);
     
-    if let Some(result) = arbitrage_engine.detect_spread(&binance_tick, &kraken_tick) {
+    if let Some(result) = engine.detect_spread(&binance_tick, &kraken_tick) {
         {
             let mut w = state.write().await;
             let now = chrono::Utc::now().timestamp_millis() as u64;
@@ -321,7 +333,16 @@ async fn check_arbitrage(
         let dynamic_volume: f64 = {
             use rand::Rng;
             let mut rng = rand::thread_rng();
-            rng.gen_range(0.005..=0.020)
+            let (max_vol) = {
+                if let Ok(conf) = dyn_config.read() {
+                    conf.max_trade_volume_btc
+                } else {
+                    0.01
+                }
+            };
+            // Generate random volume up to the dynamic max_vol limit
+            let min_vol = 0.001f64.max(max_vol / 4.0);
+            rng.gen_range(min_vol..=max_vol)
         };
 
         // SAVE TRADE TO DB

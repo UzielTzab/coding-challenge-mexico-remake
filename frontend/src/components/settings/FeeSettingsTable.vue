@@ -22,13 +22,29 @@ const columns = [
       <span style="text-transform: capitalize; font-weight: 500;">{{ item.exchange }}</span>
     </template>
     <template #cell-maker_fee="{ item }">
-      {{ formatPercent(item.maker_fee) }}
+      <input type="number" step="0.0001" v-model.number="item.maker_fee" class="fee-input" />
     </template>
     <template #cell-taker_fee="{ item }">
-      {{ formatPercent(item.taker_fee) }}
+      <input type="number" step="0.0001" v-model.number="item.taker_fee" class="fee-input" />
     </template>
     <template #cell-withdrawal_fee="{ item }">
-      <span class="numeric">{{ item.withdrawal_fee }}</span>
+      <input type="number" step="1" v-model.number="item.withdrawal_fee" class="fee-input" />
     </template>
   </AppTable>
 </template>
+
+<style scoped>
+.fee-input {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: 80px;
+  font-family: monospace;
+}
+.fee-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+</style>

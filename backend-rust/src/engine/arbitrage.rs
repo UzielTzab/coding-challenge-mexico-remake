@@ -4,6 +4,8 @@ use crate::engine::risk::RiskManager;
 pub struct ArbitrageEngine {
     pub risk_manager: RiskManager,
     pub threshold: f64,
+    pub binance_fee_pct: f64,
+    pub kraken_fee_pct: f64,
 }
 
 pub struct ArbitrageResult {
@@ -14,10 +16,12 @@ pub struct ArbitrageResult {
 }
 
 impl ArbitrageEngine {
-    pub fn new(risk_manager: RiskManager, threshold: f64) -> Self {
+    pub fn new(risk_manager: RiskManager, threshold: f64, binance_fee_pct: f64, kraken_fee_pct: f64) -> Self {
         Self {
             risk_manager,
             threshold,
+            binance_fee_pct,
+            kraken_fee_pct,
         }
     }
 
@@ -28,15 +32,23 @@ impl ArbitrageEngine {
         // Buy on B (ask), sell on A (bid)
         let spread_buy_b_sell_a = tick_a.bid - tick_b.ask;
 
-        let (max_spread, _buy_exchange, _sell_exchange) = if spread_buy_a_sell_b > spread_buy_b_sell_a {
-            (spread_buy_a_sell_b, "A", "B")
+        let (max_spread, fee_cost, _buy_exchange, _sell_exchange) = if spread_buy_a_sell_b > spread_buy_b_sell_a {
+            // A = Binance, B = Kraken
+            let fee_a = tick_a.ask * self.binance_fee_pct;
+            let fee_b = tick_b.bid * self.kraken_fee_pct;
+            (spread_buy_a_sell_b, fee_a + fee_b, "A", "B")
         } else {
-            (spread_buy_b_sell_a, "B", "A")
+            // B = Kraken, A = Binance
+            let fee_b = tick_b.ask * self.kraken_fee_pct;
+            let fee_a = tick_a.bid * self.binance_fee_pct;
+            (spread_buy_b_sell_a, fee_b + fee_a, "B", "A")
         };
 
-        if max_spread > self.threshold {
+        let net_margin = max_spread - fee_cost;
+
+        if net_margin > self.threshold {
             // Apply risk math
-            let sim_result = self.risk_manager.simulate_trade(tick_a, max_spread);
+            let sim_result = self.risk_manager.simulate_trade(tick_a, net_margin);
 
             Some(ArbitrageResult {
                 spread: max_spread,
@@ -66,7 +78,7 @@ mod tests {
     #[test]
     fn test_detect_profitable_spread_binance_buy() {
         let risk = RiskManager::new(0.0, 0.0);
-        let engine = ArbitrageEngine::new(risk, 5.0);
+        let engine = ArbitrageEngine::new(risk, 5.0, 0.001, 0.0026);
         
         let binance = mock_tick(60000.0, 60010.0); // Buy at 60010
         let kraken = mock_tick(60020.0, 60030.0);  // Sell at 60020
@@ -81,7 +93,7 @@ mod tests {
     #[test]
     fn test_reject_low_profit_spread() {
         let risk = RiskManager::new(0.0, 0.0);
-        let engine = ArbitrageEngine::new(risk, 5.0);
+        let engine = ArbitrageEngine::new(risk, 5.0, 0.001, 0.0026);
         
         let binance = mock_tick(60000.0, 60010.0);
         let kraken = mock_tick(60012.0, 60020.0);
