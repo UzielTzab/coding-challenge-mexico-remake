@@ -29,7 +29,6 @@ const formatNumber = (val: number, props: Props) => {
   <AppCard class="kpi-card" variant="soft">
     <div class="kpi-header">
       <div class="kpi-label uppercase-label">{{ title }}</div>
-      <div v-if="iconSvg" class="kpi-icon-wrapper" :style="{ backgroundColor: iconBgColor, color: iconColor }" v-html="iconSvg"></div>
     </div>
     <div class="kpi-value-row">
       <span class="kpi-value numeric">
@@ -59,21 +58,6 @@ const formatNumber = (val: number, props: Props) => {
   align-items: center;
 }
 
-.kpi-icon-wrapper {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.1);
-}
-
-.kpi-icon-wrapper :deep(svg) {
-  width: 16px;
-  height: 16px;
-  fill: currentColor;
-}
 
 .kpi-label {
   font-size: 11px;
