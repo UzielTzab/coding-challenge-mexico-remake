@@ -1,16 +1,16 @@
-# Wall-Street HFT Arbitrage Engine 🚀
+# Motor de Arbitraje HFT
 
-Este proyecto es la solución definitiva para el Challenge Final de México. En lugar de construir un bot estándar, hemos diseñado una arquitectura institucional de **Alta Frecuencia (HFT)** capaz de mitigar los riesgos inherentes al arbitraje cripto en tiempo real.
+Este proyecto es nuestra solución para el Challenge Final de México. Hemos diseñado una arquitectura de Alta Frecuencia (HFT) enfocada en mitigar los riesgos inherentes al arbitraje cripto en tiempo real, priorizando el rendimiento y la estabilidad.
 
-## 🏗 Arquitectura del Sistema
-El motor está completamente desacoplado (Decoupling puro).
-* **Backend (Rust):** Despacha la lógica matemática, controla WebSockets y enruta órdenes. Es un sistema multi-hilo impulsado por Tokio.
-* **Frontend (Vue 3 + Pinia):** Recibe un chorro constante de ticks y lo procesa mediante un canvas reactivo y CSS nativo sin saturar el DOM, logrando visualizaciones de mercado a 60 FPS.
-* **Middleware (Redis Pub/Sub):** El puente ultra-rápido que comunica el backend y el frontend, evitando la sobrecarga en PostgreSQL. PostgreSQL se reserva **únicamente** para auditoría y persistencia asíncrona.
+## Arquitectura del Sistema
+El motor está completamente desacoplado para maximizar la velocidad de ejecución:
+* **Backend (Rust):** Maneja la lógica matemática, controla WebSockets y enruta órdenes. Es un sistema asíncrono y multi-hilo impulsado por Tokio.
+* **Frontend (Vue 3 + Pinia):** Recibe el flujo de datos y lo procesa mediante un canvas reactivo y CSS nativo para evitar la saturación del DOM, logrando visualizaciones fluidas a 60 FPS.
+* **Middleware (Redis Pub/Sub):** Actúa como el puente de baja latencia que comunica el backend y el frontend. PostgreSQL se reserva únicamente para auditoría y persistencia asíncrona, evitando cuellos de botella en la lectura de precios.
 
-## 🧠 Características Institucionales (HFT Edge)
+## Características del Motor
 
-A diferencia de bots simples de arbitraje que compran y venden ciegamente, nuestro sistema está preparado para escenarios adversos:
+A diferencia de un bot de arbitraje básico, el sistema implementa medidas de seguridad y gestión de riesgo:
 
 ### 1. Delta Neutrality (Cobertura de Riesgo Direccional)
 Si un exchange se queda sin saldo por un evento de mercado y el inventario neto del bot supera los 2.0 BTC, la exposición direccional al precio de Bitcoin es peligrosa. El bot automáticamente despacha un `DELTA_HEDGE`, emulando la apertura de una posición SHORT en futuros perpetuos para cubrir la cartera de una posible caída de precio mientras rebalancea su saldo.
@@ -29,19 +29,18 @@ Contamos con un Worker Asíncrono de Rebalanceo. Constantemente evalúa si los b
 
 ---
 
-## 💻 Tech Stack
+## Tech Stack
 - **Rust (Tokio, Axum, SQLx)**
 - **Vue 3 (Composition API, Pinia)**
-- **PostgreSQL 15 (Auditoría/Persistencia)**
-- **Redis (Mensajería Pub/Sub de baja latencia)**
+- **PostgreSQL 15**
+- **Redis**
 - **Docker & Docker Compose**
 
-## 🏁 Instalación y Uso (Jurado)
-Todo corre bajo contenedores Docker listos para despliegue:
+## Instalación y Uso
+Todo el ecosistema está contenerizado y listo para correr localmente o en un servidor:
 
 ```bash
-# Levantar todo el ecosistema (DB, Redis, Rust, Vue)
+# Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
 docker-compose up -d --build
 ```
-Una vez levantado, la plataforma estará viva y recibiendo los Websockets de mercado en `http://localhost:80`.
-¡Disfruta del motor!
+Una vez levantado, la plataforma estará disponible y conectada a los WebSockets de mercado en `http://localhost:80`.
