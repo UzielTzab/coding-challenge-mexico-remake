@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
 import AppCard from '../ui/AppCard.vue';
+import AnimatedNumber from '../ui/AnimatedNumber.vue';
 import { getOpportunities } from '../../services/opportunities.service';
 import { useFormatters } from '../../composables/useFormatters';
 import { useOpportunitiesStore } from '../../stores/opportunities.store';
@@ -45,11 +46,11 @@ onMounted(async () => {
             <td>{{ opp.symbol || opp.pair || 'BTC/USDT' }}</td>
             <td style="text-transform: capitalize;">{{ opp.buy_exchange_name || opp.buy_exchange }}</td>
             <td style="text-transform: capitalize;">{{ opp.sell_exchange_name || opp.sell_exchange }}</td>
-            <td :class="(opp.gross_spread_percent || 0) >= 0 ? 'text-success' : 'text-danger'">
-              {{ formatPercent(opp.gross_spread_percent || 0) }}
+            <td :class="(opp.gross_spread_percent || 0) >= 0 ? 'text-success' : 'text-danger'" class="numeric-cell">
+              <AnimatedNumber :value="opp.gross_spread_percent || 0" :format="formatPercent" />
             </td>
-            <td :class="(opp.net_profit || opp.profit_usd || 0) >= 0 ? 'text-success' : 'text-danger'">
-              {{ formatUSD(opp.net_profit || opp.profit_usd || 0) }}
+            <td :class="(opp.net_profit || opp.profit_usd || 0) >= 0 ? 'text-success' : 'text-danger'" class="numeric-cell">
+              <AnimatedNumber :value="opp.net_profit || opp.profit_usd || 0" :format="formatUSD" />
             </td>
             <td>
               <span v-if="opp.order_type === 'IOC' || true" class="status-badge ioc">IOC</span>
@@ -87,6 +88,8 @@ onMounted(async () => {
 .status-badge.success { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
 .status-badge.danger { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
 .status-badge.legging { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
-.status-badge.ioc { background: rgba(59, 130, 246, 0.15); color: #3b82f6;}
+.status-badge.ioc { background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
 .status-badge.discarded { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
+
+.numeric-cell { font-family: var(--font-mono); }
 </style>

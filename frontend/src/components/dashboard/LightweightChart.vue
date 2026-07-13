@@ -24,6 +24,7 @@ onMounted(() => {
     layout: {
       background: { type: ColorType.Solid, color: 'transparent' }, // Transparent for glassmorphism integration
       textColor: '#d1d4dc',
+      fontFamily: "'JetBrains Mono', monospace",
     },
     grid: {
       vertLines: { color: 'rgba(42, 46, 57, 0.5)' },
