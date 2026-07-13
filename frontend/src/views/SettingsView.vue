@@ -4,7 +4,7 @@ import AppCard from '../components/ui/AppCard.vue';
 import StrategySettingsForm from '../components/settings/StrategySettingsForm.vue';
 import RiskSettingsForm from '../components/settings/RiskSettingsForm.vue';
 import FeeSettingsTable from '../components/settings/FeeSettingsTable.vue';
-import AppButton from '../components/ui/AppButton.vue';
+import AppSnackbar from '../components/ui/AppSnackbar.vue';
 import { getSettings, updateSettings } from '../services/settings.service';
 
 const settings = ref({
@@ -22,6 +22,10 @@ const settings = ref({
 });
 
 const isSaving = ref(false);
+const showSnackbar = ref(false);
+const snackbarText = ref('');
+const snackbarIcon = ref('info');
+const snackbarIconColor = ref('var(--color-success)');
 
 const loadSettings = async () => {
   try {
@@ -40,9 +44,17 @@ const saveChanges = async () => {
   isSaving.value = true;
   try {
     await updateSettings(settings.value.id, settings.value);
-    // Mostrar notificación de éxito
+    snackbarText.value = 'Configuración guardada exitosamente';
+    snackbarIcon.value = 'check_circle';
+    snackbarIconColor.value = 'var(--color-success)';
+    showSnackbar.value = true;
+    setTimeout(() => { showSnackbar.value = false; }, 3000);
   } catch (error) {
     console.error('Error saving settings:', error);
+    snackbarText.value = 'Error al guardar configuración';
+    snackbarIcon.value = 'error';
+    snackbarIconColor.value = 'var(--color-danger)';
+    showSnackbar.value = true;
   } finally {
     isSaving.value = false;
   }
@@ -60,7 +72,10 @@ onMounted(() => {
         <h2>Configuración del Motor</h2>
         <p class="text-muted">Ajusta los umbrales de riesgo, estrategias y perfiles de comisiones.</p>
       </div>
-      <AppButton @click="saveChanges" :loading="isSaving">Guardar Cambios</AppButton>
+      <button class="btn-primary-light btn-save" :disabled="isSaving" @click="saveChanges">
+        <div v-if="isSaving" class="btn-spinner"></div>
+        <span v-else>Guardar Cambios</span>
+      </button>
     </div>
     
     <div class="settings-layout">
@@ -84,6 +99,14 @@ onMounted(() => {
       </div>
     </div>
   </div>
+
+  <AppSnackbar
+    v-model="showSnackbar"
+    :text="snackbarText"
+    :icon="snackbarIcon"
+    :icon-color="snackbarIconColor"
+    @close="showSnackbar = false"
+  />
 </template>
 
 <style scoped>
@@ -101,6 +124,43 @@ onMounted(() => {
 
 .view-header h2 { margin: 0 0 8px 0; }
 .view-header p { margin: 0; }
+
+.btn-primary-light {
+  background: var(--color-primary-light);
+  color: #000000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: opacity 150ms;
+}
+.btn-primary-light:hover:not(:disabled) { 
+  opacity: 0.85;
+}
+.btn-primary-light:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.btn-save {
+  min-width: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(0,0,0,0.3);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 .settings-layout {
   display: flex;
