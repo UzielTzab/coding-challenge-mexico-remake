@@ -25,7 +25,7 @@ defineProps<Props>();
           </th>
         </tr>
       </thead>
-      <tbody v-if="!loading">
+      <tbody v-if="data.length > 0" :class="{ 'is-reloading': loading }">
         <tr v-for="(row, index) in data" :key="index">
           <td 
             v-for="col in columns" 
@@ -38,7 +38,7 @@ defineProps<Props>();
           </td>
         </tr>
       </tbody>
-      <tbody v-else>
+      <tbody v-else-if="loading">
         <tr v-for="i in 5" :key="i">
           <td v-for="col in columns" :key="col.key">
             <AppSkeleton height="16px" width="70%" borderRadius="4px" />
@@ -83,6 +83,14 @@ defineProps<Props>();
 
 .app-table tbody tr:hover td {
   background: rgba(255, 255, 255, 0.01);
+}
+
+.app-table tbody {
+  transition: opacity 0.3s ease;
+}
+
+.is-reloading {
+  opacity: 0.6;
 }
 
 .table-loading {
