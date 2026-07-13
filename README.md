@@ -29,6 +29,36 @@ Contamos con un Worker Asíncrono de Rebalanceo. Constantemente evalúa si los b
 
 ---
 
+## Interfaz de la Plataforma
+
+El sistema cuenta con un panel de control avanzado que permite gestionar y visualizar en tiempo real todas las acciones del motor HFT:
+
+### Dashboard Principal
+Monitoreo general, métricas clave y gráfica de velas en tiempo real.
+![Dashboard](screenshots/dashboard.png)
+
+### Configuración del Motor (Settings)
+Panel de control táctico donde el usuario puede encender/apagar el bot, ajustar el spread mínimo, volumen dinámico y configurar los fees de Binance y Kraken sin necesidad de reiniciar el servidor.
+![Settings](screenshots/settings.png)
+
+### Rendimiento y Analíticas
+Resumen detallado del P&L (Ganancias y Pérdidas), Win Rate, y métricas de desempeño histórico.
+![Rendimiento](screenshots/performance.png)
+
+### Oportunidades Detectadas
+Libro mayor en tiempo real que refleja las detecciones milisegundo a milisegundo directamente desde el motor de Rust.
+![Oportunidades](screenshots/opportunities.png)
+
+### Operaciones Ejecutadas
+Historial de operaciones concretadas exitosamente o marcadas como coberturas de emergencia.
+![Operaciones](screenshots/operations.png)
+
+### Gestión de Wallets y Movimientos
+Supervisión del capital y registro automático de transferencias por Rebalanceos Triangulares o pagos de comisiones.
+![Wallets](screenshots/wallets.png)
+
+---
+
 ## Tech Stack
 - **Rust (Tokio, Axum, SQLx)**
 - **Vue 3 (Composition API, Pinia)**
