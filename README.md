@@ -87,10 +87,20 @@ POSTGRES_DB=arbitrage_db
 > [!WARNING]
 > Si estás en **Windows**, asegúrate de guardar el archivo `.env` con codificación **UTF-8 (sin BOM)**. Si usas Notepad o PowerShell, a veces se guarda en UTF-16, lo que causará un error de caracteres (como `\xff\xfeP...`) al levantar Docker. Alternativamente, puedes simplemente renombrar el archivo `.env.example` que viene en el repositorio a `.env`.
 
-### 3. Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
-En tu terminal, ejecuta:
+### 3. Instalar y compilar el Frontend (Vue 3)
+Dado que el contenedor de Nginx requiere la carpeta compilada `dist`, primero debes construir el frontend localmente:
+```bash
+cd frontend
+npm install
+npm run build
+cd ..
+```
+*(Opcional: Si solo quieres probar el frontend localmente sin Nginx, puedes ejecutar `npm run dev` y entrar a `http://localhost:5173`)*
+
+### 4. Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
+En tu terminal (en la raíz del proyecto), ejecuta:
 ```bash
 docker-compose up -d --build
 ```
 
-Una vez levantado, la plataforma estará disponible y conectada a los WebSockets de mercado en `http://localhost:80` (o `http://localhost:8080` dependiendo de tu puerto mapeado en Docker).
+Una vez levantado todo el ecosistema con Docker, la plataforma estará disponible y conectada a los WebSockets de mercado en `http://localhost:80` (o el puerto configurado).
