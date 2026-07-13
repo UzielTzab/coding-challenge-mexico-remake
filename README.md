@@ -75,12 +75,17 @@ git clone https://github.com/UzielTzab/coding-challenge-mexico-remake.git
 cd coding-challenge-mexico-remake
 
 # 2. Configurar variables de entorno
-# Crea un archivo .env en la raíz del proyecto y agrega las credenciales de la base de datos:
-echo "POSTGRES_USER=arbitrage_user" > .env
-echo "POSTGRES_PASSWORD=arbitrage_password" >> .env
-echo "POSTGRES_DB=arbitrage_db" >> .env
+**IMPORTANTE:** Debes crear manualmente un archivo llamado `.env` en la raíz del proyecto y pegar el siguiente contenido dentro de él:
+
+```env
+POSTGRES_USER=arbitrage_user
+POSTGRES_PASSWORD=arbitrage_password
+POSTGRES_DB=arbitrage_db
+```
 
 # 3. Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
+En tu terminal, ejecuta:
+```bash
 docker-compose up -d --build
 ```
 
