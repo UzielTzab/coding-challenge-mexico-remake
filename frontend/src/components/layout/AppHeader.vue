@@ -44,10 +44,12 @@ const showInitialSnackbar = () => {
 const loadSettings = async () => {
   try {
     const data = await getSettings();
-    const results = data.results || data;
-    if (results && results.length > 0) {
-      settingId.value = results[0].id;
-      const isRunning = results[0].is_running;
+    // Support both array and object responses for robustness
+    const settingsObj = Array.isArray(data) ? data[0] : (data.results && Array.isArray(data.results) ? data.results[0] : data);
+    
+    if (settingsObj && settingsObj.id) {
+      settingId.value = settingsObj.id;
+      const isRunning = settingsObj.is_running;
       botStore.setStatus(isRunning ? 'running' : 'stopped');
       backendStatus.value = true;
       
