@@ -215,13 +215,17 @@ async fn check_arbitrage(
     };
 
     // Read dynamic config
-    let (min_spread, max_vol, binance_fee, kraken_fee) = {
+    let (min_spread, max_vol, binance_fee, kraken_fee, is_running) = {
         if let Ok(conf) = dyn_config.read() {
-            (conf.min_spread_usd, conf.max_trade_volume_btc, conf.binance_fee_pct, conf.kraken_fee_pct)
+            (conf.min_spread_usd, conf.max_trade_volume_btc, conf.binance_fee_pct, conf.kraken_fee_pct, conf.is_running)
         } else {
-            (5.0, 0.01, 0.001, 0.0026)
+            (5.0, 0.01, 0.001, 0.0026, false)
         }
     };
+
+    if !is_running {
+        return; // The bot is paused, do not execute arbitrage
+    }
 
     let mut risk_manager = RiskManager::new(0.05, 0.01);
     let engine = ArbitrageEngine::new(risk_manager, min_spread, binance_fee, kraken_fee);
