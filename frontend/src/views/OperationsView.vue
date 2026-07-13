@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 import AppCard from '../components/ui/AppCard.vue';
 import OperationHistoryTable from '../components/operations/OperationHistoryTable.vue';
+import OpportunityFilters from '../components/opportunities/OpportunityFilters.vue';
 import AppPagination from '../components/ui/AppPagination.vue';
 import { getTrades } from '../services/trades.service';
 import { useOpportunitiesStore } from '../stores/opportunities.store';
@@ -13,11 +14,12 @@ const operations = ref<any[]>([]);
 
 const currentPage = ref(1);
 const totalRecords = ref(0);
+const currentFilters = ref({});
 
-const loadData = async () => {
+const loadData = async (filters = currentFilters.value) => {
   isLoading.value = true;
   try {
-    const result = await getTrades({ page: currentPage.value, limit: 10 });
+    const result = await getTrades({ ...filters, page: currentPage.value, limit: 10 });
     totalRecords.value = result.total_items || 0;
     operations.value = result.data || result;
   } catch (error) {
@@ -29,6 +31,12 @@ const loadData = async () => {
 
 const handlePageChange = (page: number) => {
   currentPage.value = page;
+  loadData();
+};
+
+const handleFilter = (filters: any) => {
+  currentFilters.value = filters;
+  currentPage.value = 1;
   loadData();
 };
 
@@ -46,8 +54,11 @@ watch(() => store.summary.trades_count, (newVal, oldVal) => {
 <template>
   <div class="view-container">
     <div class="view-header">
-      <h2>Operaciones Ejecutadas</h2>
-      <p class="text-muted">Historial de órdenes de compra/venta enviadas a los exchanges.</p>
+      <div class="title-section">
+        <h2>Operaciones Ejecutadas</h2>
+        <p class="text-muted">Historial de órdenes de compra/venta enviadas a los exchanges.</p>
+      </div>
+      <OpportunityFilters @filter="handleFilter" />
     </div>
     
     <div class="operations-layout">
@@ -72,10 +83,16 @@ watch(() => store.summary.trades_count, (newVal, oldVal) => {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  height: 100%;
 }
-.view-header h2 { margin: 0 0 8px 0; }
-.view-header p { margin: 0; }
+
+.view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.title-section h2 { margin: 0 0 8px 0; }
+.title-section p { margin: 0; }
 
 .operations-layout {
   display: flex;

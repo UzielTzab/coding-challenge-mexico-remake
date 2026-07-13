@@ -9,16 +9,15 @@ const emit = defineEmits<{
 
 const statusOptions = [
   { label: 'Todos', value: '' },
-  { label: 'Detectada', value: 'detected' },
-  { label: 'Ejecutada', value: 'executed' },
-  { label: 'Fallida', value: 'failed' }
+  { label: 'Ejecutada (Rentable)', value: 'executed' },
+  { label: 'Descartada (Fees/Slippage)', value: 'descartada' },
+  { label: 'En Proceso', value: 'detectada' }
 ];
 
 const exchangeOptions = [
   { label: 'Todos', value: '' },
   { label: 'Binance', value: 'binance' },
-  { label: 'Kraken', value: 'kraken' },
-  { label: 'Coinbase', value: 'coinbase' }
+  { label: 'Kraken', value: 'kraken' }
 ];
 
 const filters = ref({
