@@ -10,7 +10,7 @@ const routes: Array<RouteRecordRaw> = [
   { path: '/wallets', name: 'Wallets', component: () => import('../views/WalletsView.vue'), meta: { title: 'Wallets' } },
   { path: '/performance', name: 'Performance', component: () => import('../views/PerformanceView.vue'), meta: { title: 'Rendimiento' } },
   // { path: '/logs', name: 'Logs', component: () => import('../views/LogsView.vue'), meta: { title: 'Logs' } },
-  // { path: '/settings', name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { title: 'Configuración' } },
+  { path: '/settings', name: 'Settings', component: () => import('../views/SettingsView.vue'), meta: { title: 'Configuración' } },
 ];
 
 const router = createRouter({

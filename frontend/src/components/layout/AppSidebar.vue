@@ -11,6 +11,7 @@ const links = [
   { name: 'Operaciones', path: '/operations', icon: 'swap_horiz' },
   { name: 'Wallets', path: '/wallets', icon: 'account_balance_wallet' },
   { name: 'Rendimiento', path: '/performance', icon: 'leaderboard' },
+  { name: 'Configuración', path: '/settings', icon: 'settings' },
 ];
 </script>
 
