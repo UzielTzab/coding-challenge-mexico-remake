@@ -73,8 +73,9 @@ Todo el ecosistema está contenerizado y listo para correr localmente o en un se
 # 1. Clonar el repositorio
 git clone https://github.com/UzielTzab/coding-challenge-mexico-remake.git
 cd coding-challenge-mexico-remake
+```
 
-# 2. Configurar variables de entorno
+### 2. Configurar variables de entorno
 **IMPORTANTE:** Debes crear manualmente un archivo llamado `.env` en la raíz del proyecto y pegar el siguiente contenido dentro de él:
 
 ```env
@@ -83,7 +84,7 @@ POSTGRES_PASSWORD=arbitrage_password
 POSTGRES_DB=arbitrage_db
 ```
 
-# 3. Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
+### 3. Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
 En tu terminal, ejecuta:
 ```bash
 docker-compose up -d --build
