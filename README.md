@@ -84,6 +84,9 @@ POSTGRES_PASSWORD=arbitrage_password
 POSTGRES_DB=arbitrage_db
 ```
 
+> [!WARNING]
+> Si estás en **Windows**, asegúrate de guardar el archivo `.env` con codificación **UTF-8 (sin BOM)**. Si usas Notepad o PowerShell, a veces se guarda en UTF-16, lo que causará un error de caracteres (como `\xff\xfeP...`) al levantar Docker. Alternativamente, puedes simplemente renombrar el archivo `.env.example` que viene en el repositorio a `.env`.
+
 ### 3. Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
 En tu terminal, ejecuta:
 ```bash
