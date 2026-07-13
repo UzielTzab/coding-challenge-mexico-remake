@@ -318,9 +318,11 @@ async fn check_arbitrage(
             }
         }
         // Generate dynamic volume between 0.005 and 0.020 to simulate order book liquidity
-        use rand::Rng;
-        let mut rng = rand::thread_rng();
-        let dynamic_volume: f64 = rng.gen_range(0.005..=0.020);
+        let dynamic_volume: f64 = {
+            use rand::Rng;
+            let mut rng = rand::thread_rng();
+            rng.gen_range(0.005..=0.020)
+        };
 
         // SAVE TRADE TO DB
         if opp_status == "executed" || opp_status == "emergency_hedge" || opp_status == "legging_hedge" {
