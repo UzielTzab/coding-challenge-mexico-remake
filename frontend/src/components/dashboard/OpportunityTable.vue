@@ -46,8 +46,8 @@ onMounted(async () => {
             <td>{{ opp.symbol || opp.pair || 'BTC/USDT' }}</td>
             <td style="text-transform: capitalize;">{{ opp.buy_exchange_name || opp.buy_exchange }}</td>
             <td style="text-transform: capitalize;">{{ opp.sell_exchange_name || opp.sell_exchange }}</td>
-            <td :class="(opp.gross_spread_percent || 0) >= 0 ? 'text-success' : 'text-danger'" class="numeric-cell">
-              <AnimatedNumber :value="opp.gross_spread_percent || 0" :format="formatPercent" />
+            <td :class="(opp.gross_margin || opp.gross_spread_percent || 0) >= 0 ? 'text-success' : 'text-danger'" class="numeric-cell">
+              <AnimatedNumber :value="opp.gross_margin || opp.gross_spread_percent || 0" :format="formatPercent" />
             </td>
             <td :class="(opp.net_profit || opp.profit_usd || 0) >= 0 ? 'text-success' : 'text-danger'" class="numeric-cell">
               <AnimatedNumber :value="opp.net_profit || opp.profit_usd || 0" :format="formatUSD" />
