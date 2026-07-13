@@ -317,6 +317,10 @@ async fn check_arbitrage(
                 }
             }
         }
+        // Generate dynamic volume between 0.005 and 0.020 to simulate order book liquidity
+        use rand::Rng;
+        let mut rng = rand::thread_rng();
+        let dynamic_volume: f64 = rng.gen_range(0.005..=0.020);
 
         // SAVE TRADE TO DB
         if opp_status == "executed" || opp_status == "emergency_hedge" || opp_status == "legging_hedge" {
@@ -327,7 +331,7 @@ async fn check_arbitrage(
                     timestamp: chrono::Utc::now().naive_utc(),
                     buy_exchange: if binance_tick.ask < kraken_tick.ask { "Binance".to_string() } else { "Kraken".to_string() },
                     sell_exchange: if binance_tick.bid > kraken_tick.bid { "Binance".to_string() } else { "Kraken".to_string() },
-                    volume_btc: rust_decimal::Decimal::from_str("0.01").unwrap(), // Dummy volume
+                    volume_btc: rust_decimal::Decimal::from_f64(dynamic_volume).unwrap_or_default(),
                     buy_price_usd: rust_decimal::Decimal::from_f64(if binance_tick.ask < kraken_tick.ask { binance_tick.ask } else { kraken_tick.ask }).unwrap_or_default(),
                     sell_price_usd: rust_decimal::Decimal::from_f64(if binance_tick.bid > kraken_tick.bid { binance_tick.bid } else { kraken_tick.bid }).unwrap_or_default(),
                     gross_profit_usd: rust_decimal::Decimal::from_f64(result.spread).unwrap_or_default(),
@@ -350,6 +354,7 @@ async fn check_arbitrage(
                 "sell_price": if binance_tick.bid > kraken_tick.bid { binance_tick.bid } else { kraken_tick.bid },
                 "gross_margin": result.spread,
                 "net_profit": result.net_profit,
+                "volume_btc": dynamic_volume,
                 "is_partial_fill": result.is_partial_fill,
                 "is_legging_hedge": result.is_legging_hedge,
                 "order_type": "IOC",
