@@ -104,10 +104,12 @@ onMounted(async () => {
         iconSvg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.06 11.57c.59-.62.94-1.43.94-2.32 0-1.78-1.39-3.28-3.23-3.64V3h-2v2.16c-.53-.08-1.09-.12-1.67-.12V3h-2v2h-4v2h1.5c.83 0 1.5.67 1.5 1.5v9c0 .83-.67 1.5-1.5 1.5H5v2h4v2h2v-2h1.67c.58 0 1.14-.04 1.67-.12V21h2v-2.61c2.14-.29 3.82-2.12 3.82-4.39 0-1.12-.4-2.15-1.08-2.93zM10 7.5h2.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5H10v-3zm3.5 9H10v-3.5h3.5c.96 0 1.75.78 1.75 1.75S14.46 16.5 13.5 16.5z"/></svg>'
       />
 
-      <!-- Fila 2: Tabla, Gráfica y Exchanges -->
-      <OpportunityTable class="col-span-4" />
-      <PerformanceCharts class="col-span-5" />
-      <div class="col-span-3 exchange-cards-container">
+      <!-- Fila 2: Gráfica + Tabla (Izquierda) y Exchanges (Derecha) -->
+      <div class="col-span-8 flex-col-container">
+        <PerformanceCharts />
+        <OpportunityTable />
+      </div>
+      <div class="col-span-4 exchange-cards-container">
         <ExchangeCard 
           exchangeName="Binance" 
           :connected="Object.keys(marketStore.snapshots).some(k => k.includes('binance'))" 
@@ -141,6 +143,12 @@ onMounted(async () => {
 .col-span-12 { grid-column: span 12; }
 
 .exchange-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.flex-col-container {
   display: flex;
   flex-direction: column;
   gap: 16px;
