@@ -47,6 +47,9 @@ export const useMarketStore = defineStore('market', () => {
     wsError.value = e as unknown as Error
   }
 
+  let currentCandle: CandleData | null = null;
+  let lastCandleTime = 0;
+
   ws.onmessage = (event) => {
     try {
       const data = JSON.parse(event.data)
@@ -59,8 +62,31 @@ export const useMarketStore = defineStore('market', () => {
         volume24h.value = data.volume
       }
 
-      // Fast path for chart updates: assuming data has candle fields
-      if (data.time && data.open && data.high && data.low && data.close) {
+      // Aggregate tick data into OHLC candles
+      if (data.type === 'market_update' && data.best_bid && data.best_ask) {
+        const midPrice = (data.best_bid + data.best_ask) / 2;
+        const nowSec = Math.floor(Date.now() / 1000);
+        
+        if (!currentCandle || nowSec > lastCandleTime) {
+          currentCandle = {
+            time: nowSec as number,
+            open: currentCandle ? currentCandle.close : midPrice,
+            high: currentCandle ? currentCandle.close : midPrice,
+            low: currentCandle ? currentCandle.close : midPrice,
+            close: midPrice
+          };
+          lastCandleTime = nowSec;
+        } else {
+          currentCandle.high = Math.max(currentCandle.high, midPrice);
+          currentCandle.low = Math.min(currentCandle.low, midPrice);
+          currentCandle.close = midPrice;
+        }
+        
+        // Notify chart components directly without triggering Vue re-renders
+        for (let i = 0; i < subscribers.value.length; i++) {
+          subscribers.value[i]({...currentCandle})
+        }
+      } else if (data.time && data.open && data.high && data.low && data.close) {
         const candle: CandleData = {
           time: data.time,
           open: data.open,
@@ -69,7 +95,6 @@ export const useMarketStore = defineStore('market', () => {
           close: data.close
         }
         
-        // Notify chart components directly without triggering Vue re-renders
         for (let i = 0; i < subscribers.value.length; i++) {
           subscribers.value[i](candle)
         }

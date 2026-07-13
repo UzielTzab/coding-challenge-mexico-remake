@@ -67,36 +67,8 @@ pub async fn dummy_wallet_movements(State(state): State<Arc<AppState>>) -> Json<
         }
     }
     
-    // Fallback: Mock data if empty
-    let mock_results = vec![
-        serde_json::json!({
-            "id": "1",
-            "movement_type": "Rebalance In",
-            "asset": "BTC",
-            "amount": "0.50",
-            "exchange": "binance",
-            "created_at": chrono::Utc::now().to_rfc3339()
-        }),
-        serde_json::json!({
-            "id": "2",
-            "movement_type": "Rebalance Out",
-            "asset": "BTC",
-            "amount": "-0.50",
-            "exchange": "kraken",
-            "created_at": (chrono::Utc::now() - chrono::Duration::minutes(5)).to_rfc3339()
-        }),
-        serde_json::json!({
-            "id": "3",
-            "movement_type": "Fee Deduction",
-            "asset": "USDT",
-            "amount": "-1.50",
-            "exchange": "binance",
-            "created_at": (chrono::Utc::now() - chrono::Duration::hours(2)).to_rfc3339()
-        })
-    ];
-
     Json(serde_json::json!({
-        "count": mock_results.len(),
-        "results": mock_results
+        "count": 0,
+        "results": []
     }))
 }
