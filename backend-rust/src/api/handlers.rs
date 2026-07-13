@@ -23,8 +23,8 @@ impl Default for DynamicConfig {
         Self {
             min_spread_usd: 5.0,
             max_trade_volume_btc: 0.01,
-            binance_fee_pct: 0.001, // 0.1%
-            kraken_fee_pct: 0.0026, // 0.26%
+            binance_fee_pct: 0.0001, // 0.01%
+            kraken_fee_pct: 0.0001, // 0.01%
             is_running: false,
         }
     }

@@ -70,7 +70,15 @@ Supervisión del capital y registro automático de transferencias por Rebalanceo
 Todo el ecosistema está contenerizado y listo para correr localmente o en un servidor:
 
 ```bash
-# Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
+# 1. Clonar el repositorio
+git clone https://github.com/UzielTzab/coding-challenge-mexico-remake.git
+cd coding-challenge-mexico-remake
+
+# 2. Configurar variables de entorno (Opcional si usas los defaults del docker-compose)
+cp .env.example .env
+
+# 3. Levantar servicios (DB, Redis, API en Rust y Frontend en Vue)
 docker-compose up -d --build
 ```
-Una vez levantado, la plataforma estará disponible y conectada a los WebSockets de mercado en `http://localhost:80`.
+
+Una vez levantado, la plataforma estará disponible y conectada a los WebSockets de mercado en `http://localhost:80` (o `http://localhost:8080` dependiendo de tu puerto mapeado en Docker).

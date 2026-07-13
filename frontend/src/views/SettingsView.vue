@@ -16,8 +16,8 @@ const settings = ref({
   circuit_breaker_pause: 15,
   latency_alert_ms: 200,
   fees: [
-    { exchange: 'binance', maker_fee: 0.001, taker_fee: 0.001, withdrawal_fee: 10 },
-    { exchange: 'kraken', maker_fee: 0.0016, taker_fee: 0.0026, withdrawal_fee: 15 }
+    { exchange: 'binance', maker_fee: 0.0001, taker_fee: 0.0001, withdrawal_fee: 10 },
+    { exchange: 'kraken', maker_fee: 0.0001, taker_fee: 0.0001, withdrawal_fee: 15 }
   ]
 });
 

@@ -219,7 +219,7 @@ async fn check_arbitrage(
         if let Ok(conf) = dyn_config.read() {
             (conf.min_spread_usd, conf.max_trade_volume_btc, conf.binance_fee_pct, conf.kraken_fee_pct, conf.is_running)
         } else {
-            (5.0, 0.01, 0.001, 0.0026, false)
+            (5.0, 0.01, 0.0001, 0.0001, false)
         }
     };
 
